@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEPT® | Digital Velocity Diagnostic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 leading-relaxed">
+    <div id="app" class="max-w-2xl mx-auto py-12 px-6">
+        <div id="intro" class="text-center py-12">
+            <div class="mb-8 flex justify-center"><span class="font-bold text-2xl tracking-tighter">DEPT<span class="text-slate-400">®</span></span></div>
+            <h1 class="text-4xl font-extrabold mb-4 tracking-tight">The Digital Velocity Diagnostic</h1>
+            <p class="text-xl mb-10 text-slate-600">Identify your AI growth gaps and move from experimentation to execution in under 5 minutes.</p>
+            <button onclick="start()" class="bg-black text-white px-10 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl">Start Assessment</button>
+        </div>
+    </div>
+
+    <script>
+        // FULL DATA FROM YOUR PDF 
+        const questions = [
+            { id: 1, text: "How does your organisation currently produce content at scale?", type: "velocity", options: [{l:"Manual & Campaign-Based", p:0}, {l:"Template-Driven", p:1}, {l:"Tool-Assisted", p:2}, {l:"Orchestrated System", p:3}] },
+            { id: 2, text: "What's your biggest bottleneck in getting content to market?", type: "velocity", options: [{l:"Approval Cycles", p:0}, {l:"Creative Capacity", p:1}, {l:"Localization", p:2}, {l:"No bottleneck / Automated", p:3}] },
+            { id: 3, text: "How do you ensure brand consistency across markets?", type: "velocity", options: [{l:"Manual Review (Brand Police)", p:0}, {l:"Guidelines & Training", p:1}, {l:"Automated Checks", p:2}, {l:"AI Quality Control", p:3}] },
+            { id: 4, text: "How personalized is your customer experience today?", type: "velocity", options: [{l:"Segment-Based (Broad)", p:0}, {l:"Channel-Specific", p:1}, {l:"Rules-Based Dynamic", p:2}, {l:"Predictive & Real-Time", p:3}] },
+            { id: 5, text: "How connected is your customer experience across channels?", type: "velocity", options: [{l:"Siloed Channels", p:0}, {l:"Shared Data (but slow)", p:1}, {l:"Semi-Connected/Responsive", p:2}, {l:"Fully Orchestrated", p:3}] },
+            { id: 6, text: "How do you optimize media spend across channels?", type: "velocity", options: [{l:"Historical Spend / Gut Feel", p:0}, {l:"Platform Dashboards (Manual)", p:1}, {l:"Attribution Modeling", p:2}, {l:"AI-Driven MMM", p:3}] },
+            { id: 7, text: "How do you measure true incremental impact?", type: "velocity", options: [{l:"We Don't / ROAS only", p:0}, {l:"Annual Brand Studies", p:1}, {l:"Geo/Holdout Tests", p:2}, {l:"Continuous Causal Inference", p:3}] },
+            { id: 8, text: "How does creative performance inform media buying?", type: "velocity", options: [{l:"It Doesn't (Separate Teams)", p:0}, {l:"Post-Campaign Analysis", p:1}, {l:"In-Flight Optimization", p:2}, {l:"Pre-Flight AI Scoring", p:3}] },
+            { id: 9, text: "How much time is spent on repetitive, manual tasks?", type: "velocity", options: [{l:"50%+: High Manual Burden", p:0}, {l:"30-50%: Semi-automated", p:1}, {l:"15-30%: Mostly Strategic", p:2}, {l:"<15%: AI-Agent Driven", p:3}] },
+            { id: 10, text: "What happens when your tech stack breaks?", type: "velocity", options: [{l:"Chaos / Manual Workarounds", p:0}, {l:"Wait for Vendor Support", p:1}, {l:"Internal Troubleshooting", p:2}, {l:"Self-Healing AI Systems", p:3}] },
+            { id: 11, text: "How unified is your customer data?", type: "foundation", options: [{l:"Fragmented Everywhere", p:0}, {l:"Data Warehouse (Storage only)", p:1}, {l:"CDP (Identity Works)", p:2}, {l:"Unified & Activated", p:3}] },
+            { id: 12, text: "How does your organization approach AI initiatives?", type: "foundation", options: [{l:"Pilot Purgatory", p:0}, {l:"Point Solutions (No coordination)", p:1}, {l:"Strategic Roadmap", p:2}, {l:"Embedded & Scaling", p:3}] },
+            { id: 13, text: "How discoverable is your brand in AI search?", type: "foundation", options: [{l:"No Idea / No strategy", p:0}, {l:"Monitoring Mentions", p:1}, {l:"Experimenting with GEO", p:2}, {l:"AI-First Visibility", p:3}] },
+            { id: 14, text: "What is your current agency/partner model?", type: "foundation", options: [{l:"Multiple Specialists (5+)", p:0}, {l:"Lead Agency + Specialists", p:1}, {l:"Integrated Team (Shared Goals)", p:2}, {l:"Unified Operating Model", p:3}] },
+            { id: 15, text: "Who owns AI and automation implementation?", type: "foundation", options: [{l:"IT Department (Slow)", p:0}, {l:"External Vendors (Hand-over)", p:1}, {l:"Hybrid Teams (Collaboration)", p:2}, {l:"Embedded AI/Data Team", p:3}] }
+        ];
+
+        let currentStep = 0;
+        let vScore = 0;
+        let fScore = 0;
+
+        function start() { render(); }
+
+        function next(pts, type) {
+            if(type === 'velocity') vScore += pts; else fScore += pts;
+            currentStep++;
+            if (currentStep < questions.length) render(); else results();
+        }
+
+        function render() {
+            const q = questions[currentStep];
+            const progress = Math.round((currentStep / questions.length) * 100);
+            document.getElementById('app').innerHTML = `
+                <div class="mb-10 w-full bg-slate-200 h-1 rounded-full"><div class="bg-black h-1 rounded-full transition-all" style="width:${progress}%"></div></div>
+                <h2 class="text-3xl font-bold mb-8 tracking-tight">${q.text}</h2>
+                <div class="grid gap-4">
+                    ${q.options.map(o => `<button onclick="next(${o.p}, '${q.type}')" class="text-left p-6 border-2 border-slate-200 rounded-2xl hover:border-black hover:bg-white transition-all font-medium text-lg">${o.l}</button>`).join('')}
+                </div>
+            `;
+        }
+
+        function results() {
+            // SCORING LOGIC 
+            const isHighF = fScore >= 12;
+            const isHighV = vScore >= 15;
+            let res = { t: "The Pilot Paradox", i: "You're building a museum of proof-of-concepts." };
+            if (isHighF && !isHighV) res = { t: "The Sleeping Giant", i: "You're not held back by tech, but by organizational inertia." };
+            if (!isHighF && isHighV) res = { t: "The Speed Trap", i: "Short-term wins are masking long-term fragility." };
+            if (isHighF && isHighV) res = { t: "The AI-Native Leader", i: "Your competitive advantage has a half-life." };
+
+            document.getElementById('app').innerHTML = `
+                <div class="text-center animate-in fade-in duration-700">
+                    <p class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-2">Your Profile</p>
+                    <h1 class="text-5xl font-black mb-10 tracking-tighter">${res.t}</h1>
+                    <div class="bg-black text-white p-10 rounded-3xl mb-12 shadow-2xl">
+                        <p class="text-2xl italic font-serif leading-snug">"${res.i}"</p>
+                    </div>
+                    <div class="text-left space-y-6">
+                        <h3 class="text-2xl font-bold">Your Next Step: The Growth Gap Session</h3>
+                        <p class="text-lg text-slate-600">Most CMOs score between 18-32. The gap between your strategic intent and operational reality is where your growth is hiding [cite: 150-152].</p>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200">
+                            <p class="font-bold mb-2">A 90-minute session with Duncan Edwards to:</p>
+                            <ul class="text-slate-600 space-y-2 list-disc pl-5">
+                                <li>Map your specific operational friction points[cite: 155].</li>
+                                <li>Identify your fastest path to AI impact[cite: 156].</li>
+                                <li>Pressure-test your current agency model[cite: 157].</li>
+                            </ul>
+                        </div>
+                        <a href="mailto:duncan.edwards@deptagency.com" class="block w-full bg-black text-white text-center py-5 rounded-full font-bold text-xl hover:bg-zinc-800 shadow-lg">Book Session with Duncan</a>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
