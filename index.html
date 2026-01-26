@@ -12,12 +12,11 @@
         body { font-family: 'Inter', sans-serif; background-color: #F5F4F3; color: #1E1E1E; }
         .dept-orange { color: #FF4901; }
         .bg-dept-orange { background-color: #FF4901; }
-        .border-dept-orange { border-color: #FF4901; }
         .font-tight { font-weight: 900; letter-spacing: -0.05em; }
         [x-cloak] { display: none !important; }
         .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: #1E1E1E; padding: 2px; position: relative; }
         .matrix-cell { background: white; min-height: 150px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; }
-        .plot-point { width: 16px; height: 16px; background: #FF4901; border: 3px solid white; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 15px rgba(255,73,1,0.5); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .plot-point { width: 18px; height: 18px; background: #FF4901; border: 3px solid white; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); z-index: 50; box-shadow: 0 0 15px rgba(255,73,1,0.6); transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
 <body x-data="assessment()" class="antialiased">
@@ -30,72 +29,65 @@
             <span class="font-tight text-xl uppercase tracking-tighter">DEPT<span class="text-slate-400">®</span></span>
         </div>
         <div x-show="step === 'quiz'" class="flex items-center space-x-6" x-cloak>
-            <button @click="reset()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-black">Reset</button>
             <div class="flex items-center space-x-3">
                 <div class="w-32 md:w-48 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-dept-orange h-full transition-all duration-500" :style="'width:' + progress + '%'"></div>
+                    <div class="bg-dept-orange h-full transition-all duration-500" :style="'width:' + progressPercentage + '%'"></div>
                 </div>
-                <span class="text-[10px] font-bold text-slate-500" x-text="progress + '%'"></span>
+                <span class="text-[10px] font-bold text-slate-500" x-text="progressPercentage + '%'"></span>
             </div>
         </div>
     </nav>
 
     <main class="pt-24 pb-12 px-6">
         <section x-show="step === 'intro'" class="max-w-4xl mx-auto text-center py-20">
-            <h1 class="text-5xl md:text-7xl font-tight uppercase mb-8 leading-none tracking-tighter">The World Doesn't Wait for Growth.<br><span class="dept-orange italic underline text-6xl">Together we can invent it.</span></h1>
+            <h1 class="text-6xl md:text-8xl font-tight uppercase mb-8 leading-none tracking-tighter">The World Doesn't Wait for Growth.</h1>
+            <h2 class="text-4xl md:text-6xl dept-orange font-tight uppercase italic mb-10 tracking-tighter">Together we can invent it.</h2>
             <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">AI Marketing Maturity Assessment. Identify your strategic bottlenecks and move from 'Pilot Purgatory' to scaled execution.</p>
-            <button @click="step = 'quiz'" class="bg-[#1E1E1E] text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Begin Assessment</button>
+            <button @click="step = 'quiz'" class="bg-[#1E1E1E] text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Start Diagnostic</button>
         </section>
 
         <section x-show="step === 'quiz'" x-cloak class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-12 gap-12">
                 <div class="lg:col-span-4">
-                    <div class="sticky top-32 space-y-6">
-                        <div class="bg-black text-white p-8 rounded-[32px] shadow-2xl relative overflow-hidden">
-                            <div class="relative z-10">
-                                <span class="text-dept-orange text-[10px] font-bold uppercase tracking-widest mb-4 block">Strategic Context</span>
-                                <h3 class="text-2xl font-tight uppercase mb-4 leading-tight" x-text="currentQuestion().pillar"></h3>
-                                <p class="text-slate-300 text-sm leading-relaxed italic" x-text="currentPillarInsight()"></p>
-                            </div>
+                    <div class="sticky top-32">
+                        <div class="bg-black text-white p-10 rounded-[40px] shadow-2xl relative overflow-hidden">
+                            <span class="text-dept-orange text-[10px] font-bold uppercase tracking-widest mb-4 block">Strategic Context</span>
+                            <h3 class="text-3xl font-tight uppercase mb-6 leading-tight" x-text="questions[qIndex].pillar"></h3>
+                            <p class="text-slate-300 text-sm leading-relaxed italic" x-text="currentPillarInsight"></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-8">
-                    <div x-show="currentQuestion()" class="animate-in fade-in slide-in-from-right-8 duration-500">
-                        <h2 class="text-3xl md:text-4xl font-tight uppercase mb-10 leading-tight tracking-tight text-black" x-text="currentQuestion().text"></h2>
+                    <div class="animate-in fade-in slide-in-from-right-8 duration-500">
+                        <h2 class="text-4xl md:text-5xl font-tight uppercase mb-10 leading-tight text-black" x-text="questions[qIndex].text"></h2>
                         <div class="space-y-4">
-                            <template x-for="(opt, index) in currentQuestion.options" :key="index">
-                                <button @click="selectAnswer(opt.pts, currentQuestion.type, index)" 
-                                        :class="responses[qIndex] === index ? 'border-dept-orange bg-white shadow-md' : 'border-slate-200 hover:border-black'"
-                                        class="w-full text-left p-6 border-2 rounded-[24px] transition-all group flex items-start space-x-6">
-                                    <div :class="responses[qIndex] === index ? 'bg-dept-orange text-white' : 'bg-slate-100 group-hover:bg-dept-orange group-hover:text-white'"
-                                         class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs transition-colors" x-text="['A','B','C','D'][index]"></div>
+                            <template x-for="(opt, idx) in questions[qIndex].options" :key="idx">
+                                <button @click="responses[qIndex] = idx" 
+                                        :class="responses[qIndex] === idx ? 'border-dept-orange bg-white shadow-lg' : 'border-slate-200 hover:border-black'"
+                                        class="w-full text-left p-8 border-2 rounded-[32px] transition-all group flex items-start space-x-6">
+                                    <div :class="responses[qIndex] === idx ? 'bg-dept-orange text-white' : 'bg-slate-100 group-hover:bg-dept-orange group-hover:text-white'"
+                                         class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm transition-colors" x-text="['A','B','C','D'][idx]"></div>
                                     <span class="text-lg font-medium leading-snug" x-text="opt.label"></span>
                                 </button>
                             </template>
                         </div>
 
                         <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
-                            <button @click="prevQ()" :disabled="qIndex === 0" 
-                                    class="px-8 py-3 rounded-full font-bold uppercase text-xs tracking-widest transition-all"
-                                    :class="qIndex === 0 ? 'text-slate-300' : 'text-slate-500 hover:text-black'">
+                            <button @click="if(qIndex > 0) qIndex--" :disabled="qIndex === 0" 
+                                    class="px-8 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all text-slate-400 hover:text-black disabled:opacity-0">
                                 Previous
                             </button>
                             
-                            <template x-if="qIndex < questions.length - 1">
-                                <button @click="nextQ()" :disabled="responses[qIndex] === null"
-                                        class="px-10 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all bg-black text-white hover:bg-dept-orange disabled:opacity-30">
-                                    Next Question
-                                </button>
-                            </template>
+                            <button x-show="qIndex < 14" @click="qIndex++" :disabled="responses[qIndex] === null"
+                                    class="px-12 py-5 rounded-full font-bold uppercase text-xs tracking-widest transition-all bg-black text-white hover:bg-dept-orange disabled:opacity-20">
+                                Next Question
+                            </button>
                             
-                            <template x-if="qIndex === questions.length - 1">
-                                <button @click="results()" :disabled="responses[qIndex] === null"
-                                        class="px-10 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all bg-dept-orange text-white hover:bg-black disabled:opacity-30">
-                                    Finalise Diagnosis
-                                </button>
-                            </template>
+                            <button x-show="qIndex === 14" @click="calculateResults" :disabled="responses[qIndex] === null"
+                                    class="px-12 py-5 rounded-full font-bold uppercase text-xs tracking-widest transition-all bg-dept-orange text-white hover:bg-black disabled:opacity-20">
+                                View Diagnosis
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -104,49 +96,56 @@
 
         <section x-show="step === 'results'" x-cloak id="results-container" class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-12 gap-16 items-start">
-                
                 <div class="lg:col-span-5 sticky top-28">
                     <h2 class="text-5xl font-tight uppercase mb-10 leading-none">The Maturity Matrix</h2>
-                    <div class="matrix-grid aspect-square rounded-xl shadow-2xl mb-8">
+                    <div class="matrix-grid aspect-square rounded-2xl shadow-2xl mb-8 overflow-hidden">
                         <div class="plot-point" :style="'left:' + plotX + '%; top:' + plotY + '%;'"></div>
-                        <div @click="viewQuad = 'giant'" :class="viewQuad === 'giant' ? 'active' : ''" class="matrix-cell">
+                        <div @click="viewQuad = 'giant'" :class="viewQuad === 'giant' ? 'bg-slate-50' : ''" class="matrix-cell border-r border-b border-slate-100">
                             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">The Sleeping Giant</span>
                         </div>
-                        <div @click="viewQuad = 'native'" :class="viewQuad === 'native' ? 'active' : ''" class="matrix-cell">
+                        <div @click="viewQuad = 'native'" :class="viewQuad === 'native' ? 'bg-slate-50' : ''" class="matrix-cell border-b border-slate-100">
                             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">AI-Native Leader</span>
                         </div>
-                        <div @click="viewQuad = 'paradox'" :class="viewQuad === 'paradox' ? 'active' : ''" class="matrix-cell">
+                        <div @click="viewQuad = 'paradox'" :class="viewQuad === 'paradox' ? 'bg-slate-50' : ''" class="matrix-cell border-r border-slate-100">
                             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">The Pilot Paradox</span>
                         </div>
-                        <div @click="viewQuad = 'trap'" :class="viewQuad === 'trap' ? 'active' : ''" class="matrix-cell">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">The Speed Trap</span>
+                        <div @click="viewQuad = 'trap'" :class="viewQuad === 'trap' ? 'bg-slate-50' : ''" class="matrix-cell">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">The Speed Trap</span>
                         </div>
+                    </div>
+                    <div class="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400 px-2">
+                        <span>Low Velocity</span>
+                        <button @click="reset()" class="text-dept-orange hover:underline no-print">Restart Diagnostic</button>
+                        <span>High Velocity</span>
                     </div>
                 </div>
 
-                <div class="lg:col-span-7 bg-white p-12 rounded-[40px] shadow-sm border border-slate-100">
+                <div class="lg:col-span-7 bg-white p-12 rounded-[48px] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-start mb-8">
                         <div>
-                            <span x-show="viewQuad === diagnosis" class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block">Primary Diagnosis</span>
-                            <h3 class="text-5xl font-tight uppercase leading-none text-black" x-text="quadrants[viewQuad].name"></h3>
+                            <span x-show="viewQuad === diagnosis" class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block">Your Position</span>
+                            <h3 class="text-6xl font-tight uppercase leading-none text-black" x-text="quadrants[viewQuad].name"></h3>
                         </div>
+                        <button @click="downloadPDF" class="no-print bg-slate-100 hover:bg-slate-200 p-5 rounded-full transition">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </button>
                     </div>
 
-                    <p class="text-xl text-slate-600 mb-10 leading-relaxed font-medium" x-text="quadrants[viewQuad].description"></p>
+                    <p class="text-2xl text-slate-600 mb-10 leading-relaxed font-medium" x-text="quadrants[viewQuad].description"></p>
 
-                    <div class="mb-10 bg-[#1E1E1E] text-white p-10 rounded-3xl">
-                        <h4 class="text-dept-orange uppercase text-[10px] font-bold tracking-widest mb-4">The Inconvenient Truth</h4>
-                        <p class="text-xl italic font-serif leading-relaxed" x-text="quadrants[viewQuad].truth"></p>
+                    <div class="mb-10 bg-[#1E1E1E] text-white p-10 rounded-[32px] shadow-xl">
+                        <h4 class="text-dept-orange uppercase text-[10px] font-bold tracking-widest mb-4 italic">The Inconvenient Truth</h4>
+                        <p class="text-2xl italic font-serif leading-relaxed" x-text="quadrants[viewQuad].truth"></p>
                     </div>
 
-                    <div class="mb-12 p-8 bg-red-50 border border-red-100 rounded-3xl">
-                        <h4 class="text-red-900 uppercase text-[10px] font-bold tracking-widest mb-3 font-bold">Risk of Staying Here</h4>
+                    <div class="mb-12 p-8 bg-red-50 border border-red-100 rounded-[32px]">
+                        <h4 class="text-red-900 uppercase text-[10px] font-bold tracking-widest mb-3 font-black">Risk of Staying Here</h4>
                         <p class="text-red-800 text-lg leading-relaxed font-medium" x-text="quadrants[viewQuad].risk"></p>
                     </div>
 
                     <div class="border-t border-slate-100 pt-10">
-                        <h4 class="text-3xl font-tight uppercase mb-6 leading-none">Your Next Step: The Growth Gap Session</h4>
-                        <p class="text-slate-600 mb-10 leading-relaxed text-lg italic">"That gap between strategic intent and operational reality is where growth is hiding."</p>
+                        <h4 class="text-4xl font-tight uppercase mb-6 leading-none">Your Next Step: The Growth Gap Session</h4>
+                        <p class="text-slate-600 mb-10 leading-relaxed text-xl font-medium">Identify your 3-5 specific friction points and map a path to 6-month ROI.</p>
                         <a href="mailto:duncan.birch@deptagency.com" class="block w-full bg-[#1E1E1E] text-white text-center py-6 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Book Session with Duncan Birch</a>
                     </div>
                 </div>
@@ -257,49 +256,35 @@
                     trap: { name: 'The Speed Trap', description: 'Your team moves fast, maybe too fast. You\'ve adopted AI tools for content, media, and automation, but they don\'t talk to each other. You\'re creating speed without sustainable systems, and technical debt is accumulating.', truth: 'Your team\'s velocity is impressive until something breaks. Right now, you\'re running on tool duct tape: ChatGPT for copywriting, separate platforms for creative QA, disconnected personalization engines, and media optimization that doesn\'t see the full picture. You\'ve traded long-term resilience for short-term speed. The moment a vendor changes pricing, a platform updates its model, or a key hire leaves, you\'re exposed. Sustainable speed requires architectural thinking, not just tactical execution.', risk: 'Short term wins are masking long term fragility. When a platform changes its API or a key person leaves, your entire operation is at risk.' },
                     native: { name: 'AI-Native Leader', description: 'You\'ve built the future marketing organisation: unified data, automated workflows, embedded AI capability, and a partner model designed for continuous evolution. You\'re not just using AI, you\'re competing with it.', truth: 'You\'ve built what most CMOs aspire to: unified data, automated operations, and AI embedded across the marketing function. But here\'s the reality, your competitive advantage has a half-life. Every capability you\'ve built is being reverse engineered by competitors, and new AI models are being released every month that could disrupt your current architecture. Staying ahead requires a partner who\'s not just executing your roadmap, but actively pushing you toward what\'s next. Innovation isn\'t a project. It\'s an operating rhythm.', risk: 'The only risk is complacency. Markets shift, models evolve, and competitors are studying your playbook. Continuous innovation is now table stakes.' }
                 },
-                currentQuestion() { return this.questions[this.qIndex]; },
-                get progress() { return Math.round((this.qIndex / this.questions.length) * 100); },
-                currentPillarInsight() {
-                    const i = {
-                        'Strategic Pillar 1: Content Supply Chain & Production': 'Many brands are trapped in expensive, manual agency briefing cycles or rigid templates that stifle creativity. We see teams bogged down by subjective review loops and administrative churn, leaving little room for actual creative strategy.',
-                        'Strategic Pillar 2: Customer Experience & Personalisation': 'Most CMOs are facing a personalisation paradox: they have the data, but it is siloed by channel, leading to fragmented customer journeys. Leaders are moving toward predictive orchestration where AI connects behavior to deliver a unified brand experience.',
-                        'Strategic Pillar 3: Media Performance & Optimization': 'With the erosion of traditional tracking, many organizations are flying blind. The shift is toward always-on lift and AI-driven MMM that optimizes spend as a dynamic, real-time investment portfolio.',
-                        'Strategic Pillar 4: Operational Efficiency & Automation': 'Marketing teams are often overwhelmed by operational drag, spending over 50% of time on manual tasks. AI agents handle routine workflows to free talent for strategy.',
-                        'Strategic Pillar 5: Data Foundation & AI Readiness': 'Too many brands are stuck in pilot purgatory because underlying data is fragmented. The focus is now on creating unified, activated data layers that power autonomous decisioning.',
-                        'Strategic Pillar 6: Organizational Structure & Change Readiness': 'The traditional multi-specialist agency model has become a bottleneck. We see a move toward Unified Operating Models where AI/Data capabilities are embedded directly into marketing.'
+                get progressPercentage() { return Math.round((this.qIndex / 15) * 100); },
+                get currentPillarInsight() {
+                    const insights = {
+                        'Strategic Pillar 1: Content Supply Chain & Production': 'Many brands are trapped in expensive briefing cycles. AI agents now automate production work while significantly increasing speed and asset quality.',
+                        'Strategic Pillar 2: Customer Experience & Personalisation': 'Personalisation is often limited to basic rules. Leaders move toward predictive orchestration where AI connects behavior across every touchpoint.',
+                        'Strategic Pillar 3: Media Performance & Optimization': 'Erosion of tracking means moving toward always on incrementality and AI-driven MMM to optimize spend portfolios.',
+                        'Strategic Pillar 4: Operational Efficiency & Automation': 'Marketing teams spend over 50% of time on manual tasks. We see an "Agentic Shift" where AI agents handle routine administrative workflows.',
+                        'Strategic Pillar 5: Data Foundation & AI Readiness': 'Brands often get stuck in pilot purgatory because underlying data is fragmented. The focus is now on activated data layers powering autonomous decisioning.',
+                        'Strategic Pillar 6: Organizational Structure & Change Readiness': 'Traditional multi-specialist models have become bottlenecks. We see a move toward Unified Operating Models with embedded AI capabilities.'
                     };
-                    return i[this.currentQuestion().pillar] || "";
+                    return insights[this.questions[this.qIndex].pillar];
                 },
-                selectAnswer(pts, type, idx) {
-                    this.responses[this.qIndex] = idx;
-                },
-                nextQ() { if(this.qIndex < 14) this.qIndex++; window.scrollTo(0,0); },
-                prevQ() { if(this.qIndex > 0) this.qIndex--; window.scrollTo(0,0); },
-                results() {
+                calculateResults() {
                     let vFinal = 0, fFinal = 0;
-                    this.responses.forEach((resIdx, qIdx) => {
-                        const q = this.questions[qIdx];
-                        const pts = q.options[resIdx].pts;
-                        if(q.type === 'v') vFinal += pts; else fFinal += pts;
+                    this.responses.forEach((idx, qIdx) => {
+                        const pts = this.questions[qIdx].options[idx].pts;
+                        if(this.questions[qIdx].type === 'v') vFinal += pts; else fFinal += pts;
                     });
-                    
                     this.plotX = (vFinal / 30) * 100;
                     this.plotY = 100 - ((fFinal / 15) * 100);
-
-                    const fHigh = fFinal >= 12;
-                    const vHigh = vFinal >= 15;
-                    
+                    const fHigh = fFinal >= 12, vHigh = vFinal >= 15;
                     if(fHigh && vHigh) this.diagnosis = 'native';
                     else if(fHigh && !vHigh) this.diagnosis = 'giant';
                     else if(!fHigh && vHigh) this.diagnosis = 'trap';
                     else this.diagnosis = 'paradox';
-                    
                     this.viewQuad = this.diagnosis; this.step = 'results';
                     window.scrollTo(0,0);
                 },
-                reset() {
-                    this.step = 'intro'; this.qIndex = 0; this.responses = Array(15).fill(null);
-                }
+                reset() { this.step = 'intro'; this.qIndex = 0; this.responses = Array(15).fill(null); }
             }
         }
     </script>
