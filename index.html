@@ -31,7 +31,7 @@
         </div>
         <div x-show="step === 'quiz'" class="flex items-center space-x-4">
             <div class="w-48 bg-slate-200 h-2 rounded-full overflow-hidden">
-                <div class="bg-dept-orange h-full transition-all duration-500" :style="`width: ${progress}%`"></div>
+                <div class="bg-dept-orange h-full transition-all duration-500" :style="`width: ${progress}%` text-xs font-bold text-slate-500" x-text="`${progress}%` "></div>
             </div>
             <span class="text-xs font-bold text-slate-500" x-text="`${progress}%` "></span>
         </div>
@@ -40,7 +40,7 @@
     <main class="pt-24 pb-12 px-6">
         <section x-show="step === 'intro'" x-cloak class="max-w-3xl mx-auto text-center py-20">
             <h1 class="text-6xl font-tight uppercase mb-6 leading-tight">The World Doesn't Wait for Growth.<br><span class="dept-orange italic underline">Together we can invent it.</span></h1>
-            <p class="text-xl text-slate-600 mb-12 font-medium">Identify your growth gaps and move from 'Pilot Purgatory' to scaled execution with our strategic maturity diagnostic.</p>
+            <p class="text-xl text-slate-600 mb-12">DEPT - AI Marketing Maturity Assessment. Identify your bottlenecks and move from 'Pilot Purgatory' to scaled execution.</p>
             <button @click="step = 'quiz'" class="bg-black text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-wider">Start Assessment</button>
         </section>
 
@@ -51,7 +51,6 @@
                         <span class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block" x-text="currentQuestion.pillar"></span>
                         <h2 class="text-3xl font-bold leading-tight" x-text="currentQuestion.text"></h2>
                     </div>
-
                     <div class="space-y-4">
                         <template x-for="(opt, index) in currentQuestion.options" :key="index">
                             <button @click="handleAnswer(opt.pts, currentQuestion.type)" 
@@ -60,7 +59,6 @@
                             </button>
                         </template>
                     </div>
-
                     <div x-show="[3, 5, 8, 10, 13, 15].includes(currentQuestion.id)" 
                          class="mt-12 p-8 bg-slate-100 rounded-3xl border border-slate-200 italic text-slate-600 text-sm">
                         <p x-text="getPillarInsight(currentQuestion.pillar)"></p>
@@ -71,28 +69,22 @@
 
         <section x-show="step === 'results'" x-cloak id="results-container" class="max-w-5xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-12 items-start">
-                
                 <div class="sticky top-28">
-                    <h2 class="text-4xl font-tight uppercase mb-8 leading-none">Your Diagnosis</h2>
-                    <div class="matrix-grid aspect-square rounded-lg mb-6 relative">
+                    <h2 class="text-4xl font-tight uppercase mb-8 leading-none">Your Maturity Diagnosis</h2>
+                    <div class="matrix-grid aspect-square rounded-lg mb-4 relative">
                         <div class="absolute -left-12 top-1/2 -rotate-90 text-[10px] font-bold uppercase tracking-widest text-slate-400">Data Trust & Integrity</div>
                         <div class="absolute bottom-[-30px] left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Execution Velocity</div>
-
                         <div @click="viewQuad = 'giant'" :class="viewQuad === 'giant' ? 'active' : ''" class="matrix-cell p-4 flex flex-col justify-end border border-slate-100">
-                            <span class="text-[10px] font-bold uppercase">Underutilized Asset</span>
-                            <div x-show="diagnosis === 'giant'" class="absolute top-2 right-2 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                            <span class="text-[10px] font-bold uppercase">The Sleeping Giant</span>
                         </div>
                         <div @click="viewQuad = 'native'" :class="viewQuad === 'native' ? 'active' : ''" class="matrix-cell p-4 flex flex-col justify-end border border-slate-100">
-                            <span class="text-[10px] font-bold uppercase">Scalable Innovator</span>
-                            <div x-show="diagnosis === 'native'" class="absolute top-2 right-2 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                            <span class="text-[10px] font-bold uppercase">AI-Native Leader</span>
                         </div>
                         <div @click="viewQuad = 'paradox'" :class="viewQuad === 'paradox' ? 'active' : ''" class="matrix-cell p-4 flex flex-col justify-end border border-slate-100">
-                            <span class="text-[10px] font-bold uppercase">Structural Laggard</span>
-                            <div x-show="diagnosis === 'paradox'" class="absolute top-2 right-2 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                            <span class="text-[10px] font-bold uppercase">The Pilot Paradox</span>
                         </div>
                         <div @click="viewQuad = 'trap'" :class="viewQuad === 'trap' ? 'active' : ''" class="matrix-cell p-4 flex flex-col justify-end border border-slate-100">
-                            <span class="text-[10px] font-bold uppercase">Tactical Sprinter</span>
-                            <div x-show="diagnosis === 'trap'" class="absolute top-2 right-2 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                            <span class="text-[10px] font-bold uppercase">The Speed Trap</span>
                         </div>
                     </div>
                 </div>
@@ -101,35 +93,4 @@
                     <div class="flex justify-between items-start mb-6">
                         <h3 class="text-4xl font-tight uppercase leading-tight" x-text="quadrants[viewQuad].name"></h3>
                         <button @click="downloadPDF" class="no-print bg-slate-100 hover:bg-slate-200 p-3 rounded-full transition">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        </button>
-                    </div>
-                    
-                    <p class="text-lg text-slate-600 mb-8" x-text="quadrants[viewQuad].description"></p>
-
-                    <div class="mb-10 bg-black text-white p-8 rounded-2xl">
-                        <h4 class="text-dept-orange uppercase text-[10px] font-bold tracking-widest mb-2">The Inconvenient Truth</h4>
-                        <p class="text-xl italic font-serif leading-relaxed" x-text="quadrants[viewQuad].truth"></p>
-                    </div>
-
-                    <div class="mb-10 p-6 bg-red-50 border border-red-100 rounded-2xl">
-                        <h4 class="text-red-900 uppercase text-[10px] font-bold tracking-widest mb-2 font-bold">Primary Business Risk</h4>
-                        <p class="text-red-800 text-sm font-medium leading-relaxed" x-text="quadrants[viewQuad].risk"></p>
-                    </div>
-
-                    <div class="border-t border-slate-100 pt-8 mt-8">
-                        <h4 class="text-2xl font-bold mb-4 uppercase">Next Step: Growth Gap Session</h4>
-                        <p class="text-slate-600 mb-8 leading-relaxed font-medium">We'd like to offer you a 90-minute session to map your specific friction points and identify the fastest path to ROI.</p>
-                        <a href="mailto:duncan.birch@deptagency.com" class="no-print block w-full bg-black text-white text-center py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition shadow-lg uppercase tracking-wider">Book Session with Duncan</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        function assessment() {
-            return {
-                step: 'intro', qIndex: 0, vScore: 0, fScore: 0, diagnosis: '', viewQuad: '',
-                questions: [
-                    { id: 1, type: 'v', pillar: 'Creative Velocity', text: 'How does your organisation currently produce content at scale?', options: [{label: 'Manual & campaign based: Agencies for major campaigns, in-house on demand.', pts: 0}, {label: 'Template driven: We use a DAM, but customization remains manual.', pts:
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2
