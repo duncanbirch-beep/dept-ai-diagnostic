@@ -14,10 +14,10 @@
         .bg-dept-orange { background-color: #FF4901; }
         .font-tight { font-weight: 900; letter-spacing: -0.05em; }
         [x-cloak] { display: none !important; }
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; background: #1E1E1E; padding: 4px; }
-        .matrix-cell { background: white; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; min-height: 140px; }
-        .matrix-cell.active { background: #FF4901 !important; color: white !important; }
-        @media print { .no-print { display: none; } }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: #1E1E1E; padding: 2px; position: relative; }
+        .matrix-cell { background: white; min-height: 150px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; }
+        .matrix-cell.active { background: #fafafa; }
+        .plot-point { width: 16px; height: 16px; background: #FF4901; border: 3px solid white; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 15px rgba(255,73,1,0.5); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body x-data="assessment()" class="antialiased">
@@ -29,90 +29,100 @@
             </svg>
             <span class="font-tight text-xl uppercase tracking-tighter">DEPT<span class="text-slate-400">®</span></span>
         </div>
-        <div x-show="step === 'quiz'" class="flex items-center space-x-4" x-cloak>
-            <div class="w-32 md:w-48 bg-slate-200 h-2 rounded-full overflow-hidden">
-                <div class="bg-dept-orange h-full transition-all duration-500" :style="'width:' + progressPercentage() + '%'"></div>
+        <div x-show="step === 'quiz'" class="flex items-center space-x-6" x-cloak>
+            <button @click="reset()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-black">Reset</button>
+            <div class="flex items-center space-x-3">
+                <div class="w-32 md:w-48 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-dept-orange h-full transition-all duration-500" :style="'width:' + progress + '%'"></div>
+                </div>
+                <span class="text-[10px] font-bold text-slate-500" x-text="progress + '%'"></span>
             </div>
-            <span class="text-xs font-bold text-slate-500" x-text="progressPercentage() + '%'"></span>
         </div>
     </nav>
 
     <main class="pt-24 pb-12 px-6">
         <section x-show="step === 'intro'" class="max-w-4xl mx-auto text-center py-20">
-            <h1 class="text-5xl md:text-7xl font-tight uppercase mb-8 leading-none tracking-tighter">The World Doesn't Wait for Growth.<br><span class="dept-orange italic underline">Together we can invent it.</span></h1>
-            <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium">DEPT® AI Marketing Maturity Assessment. Identify your strategic bottlenecks and move from 'Pilot Purgatory' to scaled execution.</p>
-            <button @click="step = 'quiz'" class="bg-[#1E1E1E] text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-wider">Start Assessment</button>
+            <h1 class="text-5xl md:text-7xl font-tight uppercase mb-8 leading-none tracking-tighter">The World Doesn't Wait for Growth.<br><span class="dept-orange italic underline text-6xl">Together we can invent it.</span></h1>
+            <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">AI Marketing Maturity Assessment. Identify your strategic bottlenecks and move from 'Pilot Purgatory' to scaled execution.</p>
+            <button @click="step = 'quiz'" class="bg-[#1E1E1E] text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Begin Assessment</button>
         </section>
 
-        <section x-show="step === 'quiz'" x-cloak class="max-w-2xl mx-auto">
-            <div x-show="currentQuestion()">
-                <div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div class="mb-10">
-                        <span class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block" x-text="currentQuestion().pillar"></span>
-                        <h2 class="text-3xl md:text-4xl font-bold leading-tight tracking-tight text-black" x-text="currentQuestion().text"></h2>
+        <section x-show="step === 'quiz'" x-cloak class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-12 gap-12">
+                <div class="lg:col-span-4">
+                    <div class="sticky top-32 space-y-6">
+                        <div class="bg-black text-white p-8 rounded-[32px] shadow-2xl relative overflow-hidden">
+                            <div class="relative z-10">
+                                <span class="text-dept-orange text-[10px] font-bold uppercase tracking-widest mb-4 block">Strategic Context</span>
+                                <h3 class="text-2xl font-tight uppercase mb-4 leading-tight" x-text="currentQuestion().pillar"></h3>
+                                <p class="text-slate-300 text-sm leading-relaxed italic" x-text="currentPillarInsight()"></p>
+                            </div>
+                            <div class="absolute -right-10 -bottom-10 opacity-10">
+                                <svg width="200" height="200" viewBox="0 0 100 100" fill="white"><path d="M50 0L58.5 31.5L90 25L70 50L90 75L58.5 68.5L50 100L41.5 68.5L10 75L30 50L10 25L41.5 31.5L50 0Z"/></svg>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="space-y-4">
-                        <template x-for="(opt, index) in currentQuestion().options" :key="index">
-                            <button @click="handleAnswer(opt.pts, currentQuestion().type)" 
-                                    class="w-full text-left p-6 border-2 border-slate-200 rounded-2xl hover:border-[#1E1E1E] hover:bg-white transition-all group relative">
-                                <span class="block text-lg font-medium pr-8" x-text="opt.label"></span>
-                                <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                </div>
-                            </button>
-                        </template>
-                    </div>
-
-                    <div x-show="[3, 5, 8, 10, 13, 15].includes(currentQuestion().id)" 
-                         class="mt-12 p-8 bg-slate-100 rounded-3xl border border-slate-200 text-slate-600 text-sm leading-relaxed">
-                        <h4 class="font-bold text-[10px] uppercase tracking-widest mb-3 text-slate-400">Strategic Context</h4>
-                        <p class="italic" x-text="getPillarInsight(currentQuestion().pillar)"></p>
+                <div class="lg:col-span-8">
+                    <div x-show="currentQuestion()" class="animate-in fade-in slide-in-from-right-8 duration-500">
+                        <h2 class="text-4xl md:text-5xl font-tight uppercase mb-10 leading-tight tracking-tight text-black" x-text="currentQuestion().text"></h2>
+                        <div class="space-y-4">
+                            <template x-for="(opt, index) in currentQuestion().options" :key="index">
+                                <button @click="handleAnswer(opt.pts, currentQuestion().type)" 
+                                        class="w-full text-left p-8 border-2 border-slate-200 rounded-[24px] hover:border-black hover:bg-white transition-all group flex items-start space-x-6">
+                                    <div class="bg-slate-100 group-hover:bg-dept-orange group-hover:text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs transition-colors" x-text="['A','B','C','D'][index]"></div>
+                                    <span class="text-lg font-medium leading-snug" x-text="opt.label"></span>
+                                </button>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section x-show="step === 'results'" x-cloak id="results-container" class="max-w-6xl mx-auto">
-            <div class="grid lg:grid-cols-2 gap-16 items-start">
+        <section x-show="step === 'results'" x-cloak id="results-container" class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-12 gap-16 items-start">
                 
-                <div class="sticky top-28">
-                    <h2 class="text-5xl font-tight uppercase mb-10 leading-none">Your Diagnosis</h2>
-                    <div class="matrix-grid aspect-square rounded-xl mb-6 relative shadow-2xl">
-                        <div class="absolute -left-16 top-1/2 -rotate-90 text-[10px] font-bold uppercase tracking-widest text-slate-400">Data Trust & Integrity</div>
-                        <div class="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Execution Velocity</div>
+                <div class="lg:col-span-5 sticky top-28">
+                    <h2 class="text-5xl font-tight uppercase mb-10 leading-none">The Maturity Matrix</h2>
+                    <div class="matrix-grid aspect-square rounded-xl shadow-2xl mb-8">
+                        <div class="plot-point" :style="'left:' + plotX + '%; top:' + plotY + '%;'"></div>
 
-                        <div @click="viewQuad = 'giant'" :class="viewQuad === 'giant' ? 'active' : ''" class="matrix-cell p-6 flex flex-col justify-end">
-                            <span class="text-xs font-bold uppercase leading-tight">Underutilized Asset</span>
-                            <div x-show="diagnosis === 'giant'" class="absolute top-4 right-4 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                        <div @click="viewQuad = 'giant'" :class="viewQuad === 'giant' ? 'active' : ''" class="matrix-cell">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Underutilized Asset</span>
                         </div>
-                        <div @click="viewQuad = 'native'" :class="viewQuad === 'native' ? 'active' : ''" class="matrix-cell p-6 flex flex-col justify-end">
-                            <span class="text-xs font-bold uppercase leading-tight">Scalable Innovator</span>
-                            <div x-show="diagnosis === 'native'" class="absolute top-4 right-4 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                        <div @click="viewQuad = 'native'" :class="viewQuad === 'native' ? 'active' : ''" class="matrix-cell">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">AI-Native Leader</span>
                         </div>
-                        <div @click="viewQuad = 'paradox'" :class="viewQuad === 'paradox' ? 'active' : ''" class="matrix-cell p-6 flex flex-col justify-end">
-                            <span class="text-xs font-bold uppercase leading-tight">Structural Laggard</span>
-                            <div x-show="diagnosis === 'paradox'" class="absolute top-4 right-4 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                        <div @click="viewQuad = 'paradox'" :class="viewQuad === 'paradox' ? 'active' : ''" class="matrix-cell">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Structural Laggard</span>
                         </div>
-                        <div @click="viewQuad = 'trap'" :class="viewQuad === 'trap' ? 'active' : ''" class="matrix-cell p-6 flex flex-col justify-end">
-                            <span class="text-xs font-bold uppercase leading-tight">Tactical Sprinter</span>
-                            <div x-show="diagnosis === 'trap'" class="absolute top-4 right-4 w-4 h-4 bg-white rounded-full animate-ping"></div>
+                        <div @click="viewQuad = 'trap'" :class="viewQuad === 'trap' ? 'active' : ''" class="matrix-cell">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">Tactical Sprinter</span>
                         </div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500 px-2">
+                        <span>Low Velocity</span>
+                        <span>High Velocity</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-12 rounded-[40px] shadow-sm border border-slate-100">
+                <div class="lg:col-span-7 bg-white p-12 rounded-[40px] shadow-sm border border-slate-100 relative">
                     <div class="flex justify-between items-start mb-8">
                         <div>
-                            <span x-show="viewQuad === diagnosis" class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block">Your Primary Diagnosis</span>
+                            <span x-show="viewQuad === diagnosis" class="bg-dept-orange text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block">Primary Diagnosis</span>
                             <h3 class="text-5xl font-tight uppercase leading-none" x-text="quadrants[viewQuad].name"></h3>
                         </div>
-                        <button @click="downloadPDF" class="no-print bg-slate-100 hover:bg-slate-200 p-4 rounded-full transition shadow-sm">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        </button>
+                        <div class="flex space-x-2 no-print">
+                            <button @click="reset()" class="bg-slate-100 hover:bg-slate-200 p-4 rounded-full transition text-[10px] font-bold uppercase tracking-widest">Reset</button>
+                            <button @click="downloadPDF" class="bg-slate-100 hover:bg-slate-200 p-4 rounded-full transition">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <p class="text-xl text-slate-600 mb-10 leading-relaxed font-medium text-black" x-text="quadrants[viewQuad].description"></p>
+                    <p class="text-xl text-slate-600 mb-10 leading-relaxed font-medium" x-text="quadrants[viewQuad].description"></p>
 
                     <div class="mb-10 bg-[#1E1E1E] text-white p-10 rounded-3xl">
                         <h4 class="text-dept-orange uppercase text-[10px] font-bold tracking-widest mb-4">The Inconvenient Truth</h4>
@@ -120,19 +130,14 @@
                     </div>
 
                     <div class="mb-12 p-8 bg-red-50 border border-red-100 rounded-3xl">
-                        <h4 class="text-red-900 uppercase text-[10px] font-bold tracking-widest mb-3 font-bold">Primary Business Risk</h4>
+                        <h4 class="text-red-900 uppercase text-[10px] font-bold tracking-widest mb-3 font-bold">Business Risk</h4>
                         <p class="text-red-800 text-lg leading-relaxed font-medium" x-text="quadrants[viewQuad].risk"></p>
                     </div>
 
-                    <div class="mb-12 p-8 bg-indigo-50 border border-indigo-100 rounded-3xl">
-                        <h4 class="text-indigo-900 uppercase text-[10px] font-bold tracking-widest mb-3 font-bold">How DEPT® Closes the Gap</h4>
-                        <p class="text-indigo-800 text-lg leading-relaxed font-medium" x-text="quadrants[viewQuad].deptHelp"></p>
-                    </div>
-
                     <div class="border-t border-slate-100 pt-10">
-                        <h4 class="text-3xl font-tight uppercase mb-6 leading-none">Your Next Step: Growth Gap Session</h4>
-                        <p class="text-slate-600 mb-10 leading-relaxed text-lg">Let's map your operational friction points and identify the fastest path to measurable ROI.</p>
-                        <a href="mailto:duncan.birch@deptagency.com" class="no-print block w-full bg-[#1E1E1E] text-white text-center py-6 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Book Session with Duncan</a>
+                        <h4 class="text-3xl font-tight uppercase mb-6 leading-none tracking-tight">Next Step: The Growth Gap Session</h4>
+                        <p class="text-slate-600 mb-10 leading-relaxed text-lg italic">"The gap between your strategic intent and operational reality is where your growth is hiding."</p>
+                        <a href="mailto:duncan.birch@deptagency.com" class="no-print block w-full bg-[#1E1E1E] text-white text-center py-6 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest">Book Session with Duncan Edwards</a>
                     </div>
                 </div>
             </div>
@@ -142,71 +147,146 @@
     <script>
         function assessment() {
             return {
-                step: 'intro',
-                qIndex: 0,
-                vScore: 0,
-                fScore: 0,
-                diagnosis: '',
-                viewQuad: '',
+                step: 'intro', qIndex: 0, vScore: 0, fScore: 0, diagnosis: '', viewQuad: '',
+                plotX: 50, plotY: 50,
                 questions: [
-                    { id: 1, type: 'v', pillar: 'Content Supply Chain & Production', text: 'How does your organisation currently produce content at scale?', options: [{label: 'Manual & campaign based: briefings to specialists or in-house on demand', pts: 0}, {label: 'Template driven: systems used, but customisation is manual', pts: 1}, {label: 'Tool assisted: adopted AI tools but across fragmented teams', pts: 2}, {label: 'Orchestrated system: Integrated engine producing variants automatically', pts: 3}]},
-                    { id: 2, type: 'v', pillar: 'Content Supply Chain & Production', text: 'What\'s your biggest bottleneck in getting content to market?', options: [{label: 'Approval Cycles: Legal and brand reviews take weeks', pts: 0}, {label: 'Creative Capacity: Can\'t produce enough variations for personalization', pts: 1}, {label: 'Localization: Translation slows us down despite high volume', pts: 2}, {label: 'No bottleneck: System handles variants and localization automatically', pts: 3}]},
-                    { id: 3, type: 'v', pillar: 'Content Supply Chain & Production', text: 'How do you ensure brand consistency across markets?', options: [{label: 'Internal Brand guardians: Central team manually reviews all assets', pts: 0}, {label: 'Guidelines & training: brand books and manual quality control', pts: 1}, {label: 'Automated checks: Tools flag basic issues like logo/colors', pts: 2}, {label: 'AI Quality control: Automated systems validate before approval', pts: 3}]},
-                    { id: 4, type: 'v', pillar: 'Customer Experience & Personalisation', text: 'How personalised is your customer experience today?', options: [{label: 'Segment based: Broad segments with generic messaging', pts: 0}, {label: 'Channel specific: Email is personalised, web/social is static', pts: 1}, {label: 'Rules based: Basic geo/device logic but fragmented', pts: 2}, {label: 'Predictive & real-time: AI dynamically adapts across touchpoints', pts: 3}]},
-                    { id: 5, type: 'v', pillar: 'Customer Experience & Personalisation', text: 'When a customer interacts with your brand, how connected is that experience?', options: [{label: 'Siloed channels: Email, web, app operate independently', pts: 0}, {label: 'Shared data: Systems see customer but don\'t act in real-time', pts: 1}, {label: 'Semi connected: Channels respond to behaviors like abandoned carts', pts: 2}, {label: 'Fully Orchestrated: Touchpoints adapt based on real-time intent', pts: 3}]},
-                    { id: 6, type: 'v', pillar: 'Media Performance & Optimization', text: 'How do you optimize media spend across channels?', options: [{label: 'Historical Spend: Allocation based on last year + 10%', pts: 0}, {label: 'Platform Dashboards: Reviewing platform reports manually', pts: 1}, {label: 'Attribution Modeling: Multi-touch attribution but struggle with lift', pts: 2}, {label: 'AI-Driven MMM: Media Mix Modeling optimizes budget allocation', pts: 3}]},
-                    { id: 7, type: 'v', pillar: 'Media Performance & Optimization', text: 'How do you measure the true incremental impact of your marketing?', options: [{label: 'We Don\'t: We report on ROAS but can\'t isolate incrementality', pts: 0}, {label: 'Annual Brand Studies: Tracking studies once or twice a year', pts: 1}, {label: 'Geo/Holdout Tests: Occasional complex and slow experiments', pts: 2}, {label: 'Always-On Incrementality: Systematic tests fed back into planning', pts: 3}]},
-                    { id: 8, type: 'v', pillar: 'Media Performance & Optimization', text: 'How does creative performance inform media buying?', options: [{label: 'It Doesn\'t: Creative and media teams operate separately', pts: 0}, {label: 'Post-Campaign: Reviewing what worked after campaigns end', pts: 1}, {label: 'In-Flight: Swapping assets during campaigns', pts: 2}, {label: 'Pre-Flight AI Scoring: Assets scored for performance before spend', pts: 3}]},
-                    { id: 9, type: 'v', pillar: 'Operational Efficiency & Automation', text: 'How much time does your team spend on repetitive, manual tasks?', options: [{label: '50%+: Reporting and data entry dominate our time', pts: 0}, {label: '30-50%: Automated some tasks but workflows are manual', pts: 1}, {label: '15-30%: Core processes automated; work is strategic', pts: 2}, {label: '<15%: AI agents handle routine work automatically', pts: 3}]},
-                    { id: 10, type: 'v', pillar: 'Operational Efficiency & Automation', text: 'When something breaks in your marketing tech stack, what happens?', options: [{label: 'Chaos: We scramble and create workarounds', pts: 0}, {label: 'Vendor Dependency: Wait for external support tickets', pts: 1}, {label: 'Internal Fix: Team troubleshooting', pts: 2}, {label: 'Self Healing: AI agents detect and resolve issues automatically', pts: 3}]},
-                    { id: 11, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How unified is your customer data?', options: [{label: 'Fragmented: CRM, web, retail all separate', pts: 0}, {label: 'Data Warehouse: Centralized storage but limited activation', pts: 1}, {label: 'Customer Data Platform: Identity resolution works; sync inconsistent', pts: 2}, {label: 'Unified & Activated: Single view powers real-time decisioning', pts: 3}]},
-                    { id: 12, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How does your organization approach AI initiatives?', options: [{label: 'Pilot Purgatory: Nothing scaled beyond proof of concept', pts: 0}, {label: 'Point Solutions: Teams use different tools with no coordination', pts: 1}, {label: 'Strategic Roadmap: Execution is slow due to tech constraints', pts: 2}, {label: 'Embedded & Scaling: AI integrated with clear ROI', pts: 3}]},
-                    { id: 13, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How discoverable is your brand in AI search?', options: [{label: 'No Idea: Haven\'t optimized for LLM search or ChatGPT', pts: 0}, {label: 'Monitoring: Track mentions but no optimization strategy', pts: 1}, {label: 'GEO Strategy: Experimenting with search optimization', pts: 2}, {label: 'AI-First Visibility: Optimizing for LLM citations and commerce', pts: 3}]},
-                    { id: 14, type: 'f', pillar: 'Organizational Structure & Change Readiness', text: 'How would you describe your current agency/partner model?', options: [{label: 'Multiple Specialists: 5+ agencies with minimal coordination', pts: 0}, {label: 'Lead Agency + Specialists: Main partner, fragmented execution', pts: 1}, {label: 'Integrated Team: Shared goals but silos remain', pts: 2}, {label: 'Unified Operating Model: Partner orchestrates tech and creative', pts: 3}]},
-                    { id: 15, type: 'f', pillar: 'Organizational Structure & Change Readiness', text: 'When you invest in AI, who owns the implementation?', options: [{label: 'IT Department: Marketing briefs; IT delivers months later', pts: 0}, {label: 'External Vendors: Consultants hand over and leave', pts: 1}, {label: 'Hybrid Teams: Marketing + IT + Partners collaborate', pts: 2}, {label: 'Embedded AI Team: Dedicated capability building AI within marketing', pts: 3}]}
+                    { id: 1, type: 'v', pillar: 'Content Supply Chain & Production', text: 'How does your organisation currently produce content at scale?', options: [
+                        {label: 'Manual & campaign based: We generally brief specific specialist agency partners on a campaign basis / We have in house teams that deliver on demand using traditional design & production teams', pts: 0},
+                        {label: 'Template driven: We use templated solutions for high volume assets, alongside a DAM, but customisation still requires significant manual work', pts: 1},
+                        {label: 'Tool assisted: We\'ve adopted AI & automation tools but we have teams using lots of different solutions', pts: 2},
+                        {label: 'Orchestrated system: We have an integrated content engine that produces variants automatically from master assets', pts: 3}
+                    ]},
+                    { id: 2, type: 'v', pillar: 'Content Supply Chain & Production', text: 'What\'s your biggest bottleneck in getting content to market?', options: [
+                        {label: 'Approval Cycles: Legal, brand, regional reviews take weeks', pts: 0},
+                        {label: 'Creative Capacity: We can\'t produce enough variations for personalization or scale across multiple channel requirements', pts: 1},
+                        {label: 'Localization: Translation and cultural adaptation slow us down but we are able to produce at high scale', pts: 2},
+                        {label: 'We don\'t have a bottleneck: Our system handles compliance, variants, and localization automatically where it is required', pts: 3}
+                    ]},
+                    { id: 3, type: 'v', pillar: 'Content Supply Chain & Production', text: 'How do you ensure brand consistency across markets and channels?', options: [
+                        {label: 'Internal Brand guardians: A central team manually reviews all assets in detail before it goes live', pts: 0},
+                        {label: 'Guidelines & training: We distribute brand books and guardrails to ensure general adherence, as well as significant manual review', pts: 1},
+                        {label: 'Automated checks: We use tools that flag basic compliance issues (logo, colors) etc. requiring a fraction of granular manual checking', pts: 2},
+                        {label: 'AI Quality control: Automated systems validate brand, legal, and regional requirements before final manual approval', pts: 3}
+                    ]},
+                    { id: 4, type: 'v', pillar: 'Customer Experience & Personalisation', text: 'How personalised is your customer experience today?', options: [
+                        {label: 'Segment based: We have quite broad customer segments with generic messaging', pts: 0},
+                        {label: 'Channel specific: Email is personalised, but web/social is mostly one size fits all', pts: 1},
+                        {label: 'Rules based / dynamic: We use basic logic (geo, device, past purchase) but it\'s fragmented', pts: 2},
+                        {label: 'Predictive & real-time: AI predicts next best action/product as well as dynamically changes experience across touchpoints', pts: 3}
+                    ]},
+                    { id: 5, type: 'v', pillar: 'Customer Experience & Personalisation', text: 'When a customer interacts with your brand, how connected is that experience?', options: [
+                        {label: 'Siloed channels: Email, web, app, retail operate mostly independently', pts: 0},
+                        {label: 'Shared data: Systems can see the same customer, but don\'t act on it in real-time', pts: 1},
+                        {label: 'Semi connected: Some channels respond to behavior (cart abandonment emails, retargeting)', pts: 2},
+                        {label: 'Fully Orchestrated: Every touchpoint adapts based on real-time context and predicted intent', pts: 3}
+                    ]},
+                    { id: 6, type: 'v', pillar: 'Media Performance & Optimization', text: 'How do you optimize media spend across channels?', options: [
+                        {label: 'Last Year + 10%: We allocate based on historical spend and gut feel', pts: 0},
+                        {label: 'Platform Dashboards: We review Google/Meta reports and adjust manually', pts: 1},
+                        {label: 'Attribution Modeling: We have multi-touch attribution but still struggle with incrementality', pts: 2},
+                        {label: 'AI-Driven MMM: Media Mix Modeling continuously optimizes budget allocation across all channels', pts: 3}
+                    ]},
+                    { id: 7, type: 'v', pillar: 'Media Performance & Optimization', text: 'How do you measure the true incremental impact of your marketing?', options: [
+                        {label: 'We Don\'t: We report on ROAS/CPA but can\'t isolate what would\'ve happened anyway', pts: 0},
+                        {label: 'Annual Brand Studies: We do tracking studies once or twice a year', pts: 1},
+                        {label: 'Geo/Holdout Tests: We run occasional experiments but they\'re complex and slow', pts: 2},
+                        {label: 'Always-On Incrementality: We systematically test incrementality and feed insights back into planning', pts: 3}
+                    ]},
+                    { id: 8, type: 'v', pillar: 'Media Performance & Optimization', text: 'How does creative performance inform media buying?', options: [
+                        {label: 'It Doesn\'t: Creative and media teams operate separately', pts: 0},
+                        {label: 'Post-Campaign Analysis: We review what worked after campaigns end', pts: 1},
+                        {label: 'In-Flight Optimization: We swap out underperforming creative during campaigns', pts: 2},
+                        {label: 'Pre-Flight AI Scoring: Creative assets are scored for predicted performance before media dollars are spent', pts: 3}
+                    ]},
+                    { id: 9, type: 'v', pillar: 'Operational Efficiency & Automation', text: 'How much time does your team spend on repetitive, manual tasks?', options: [
+                        {label: '50%+: Reporting, approval routing, resizing assets, data entry dominate our time', pts: 0},
+                        {label: '30-50%: We\'ve automated some tasks but most workflows still require human touch', pts: 1},
+                        {label: '15-30%: Core processes are automated; manual work is mostly strategic decisions', pts: 2},
+                        {label: '<15%: AI agents handle routine work; team focuses on strategy and creativity', pts: 3}
+                    ]},
+                    { id: 10, type: 'v', pillar: 'Operational Efficiency & Automation', text: 'When something breaks in your marketing tech stack, what happens?', options: [
+                        {label: 'Chaos: We scramble, create workarounds, lose data or delay campaigns', pts: 0},
+                        {label: 'Vendor Dependency: We open tickets and wait for external support', pts: 1},
+                        {label: 'Internal Fix: Our team can troubleshoot and resolve most issues', pts: 2},
+                        {label: 'Self Healing Systems: Monitoring and AI agents detect and resolve issues automatically', pts: 3}
+                    ]},
+                    { id: 11, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How unified is your customer data?', options: [
+                        {label: 'Fragmented Everywhere: CRM, web analytics, media platforms, retail all separate', pts: 0},
+                        {label: 'Data Warehouse: We have centralized storage but limited activation capability', pts: 1},
+                        {label: 'Customer Data Platform: Identity resolution works but real-time sync is inconsistent', pts: 2},
+                        {label: 'Unified & Activated: Single customer view powers real-time decisioning across all channels', pts: 3}
+                    ]},
+                    { id: 12, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How does your organization approach AI initiatives?', options: [
+                        {label: 'Pilot Purgatory: We\'ve tested AI tools but nothing has scaled beyond proof-of-concept', pts: 0},
+                        {label: 'Point Solutions: Different teams use different AI tools with no coordination', pts: 1},
+                        {label: 'Strategic Roadmap: We have a plan but execution is slow due to tech/data constraints', pts: 2},
+                        {label: 'Embedded & Scaling: AI is integrated across workflows with clear ROI and expanding use cases', pts: 3}
+                    ]},
+                    { id: 13, type: 'f', pillar: 'Data Foundation & AI Readiness', text: 'How discoverable is your brand in AI search and LLM experiences?', options: [
+                        {label: 'No Idea: We haven\'t thought about how ChatGPT, Perplexity, or AI Overviews reference our brand', pts: 0},
+                        {label: 'Monitoring: We track mentions but don\'t have a strategy to optimize for AI discovery', pts: 1},
+                        {label: 'GEO Strategy: We\'re experimenting with optimizing content for generative search', pts: 2},
+                        {label: 'AI-First Visibility: We systematically optimize for LLM citations, voice search, and AI-mediated commerce', pts: 3}
+                    ]},
+                    { id: 14, type: 'f', pillar: 'Organizational Structure & Change Readiness', text: 'How would you describe your current agency/partner model?', options: [
+                        {label: 'Multiple Specialists: 5+ agencies, each handling a channel/function, minimal coordination', pts: 0},
+                        {label: 'Lead Agency + Specialists: One main partner, but still fragmented execution', pts: 1},
+                        {label: 'Integrated Team: Agencies work together with shared goals, but tech/data silos remain', pts: 2},
+                        {label: 'Unified Operating Model: One partner orchestrates strategy, tech, data, and creative with embedded teams', pts: 3}
+                    ]},
+                    { id: 15, type: 'f', pillar: 'Organizational Structure & Change Readiness', text: 'When you invest in AI, who owns the implementation?', options: [
+                        {label: 'IT Department: Marketing briefs requirements; IT delivers months later (if at all)', pts: 0},
+                        {label: 'External Vendors: We hire consultants or agencies who hand over, then leave', pts: 1},
+                        {label: 'Hybrid Teams: Marketing + IT + Partners collaborate but struggle with handoffs', pts: 2},
+                        {label: 'Embedded AI/Data Team: Dedicated capability that builds, owns, and evolves AI within marketing', pts: 3}
+                    ]}
                 ],
                 quadrants: {
-                    giant: { name: 'Underutilized Asset', description: 'Strong data foundations but execution is held back by legacy processes[cite: 300]. You know what to do—you\'re just not built to do it fast [cite: 301].', truth: 'You are structured to protect billable hours, not to automate them[cite: 324].', risk: 'ROI Leakage. Your data advantage erodes every quarter spent in approval cycles instead of optimization loops[cite: 303].', deptHelp: 'We focus on Data/AI Enabled Commerce & Experiences to automate internal processes while delivering personalized, conversion-optimized touchpoints.' },
-                    paradox: { name: 'Structural Laggard', description: 'Testing AI tools but nothing scales due to fragmented data[cite: 306]. Every initiative requires a business case and slow procurement [cite: 307].', truth: 'You are building a legacy of proof-of-concepts, not an advantage[cite: 326].', risk: 'Market Irrelevance. AI-native competitors are capturing share while you remain in Pilot Purgatory[cite: 309].', deptHelp: 'We lead with Data/AI Strategy & Transformation to turn vision into measurable outcomes through intelligent workflow automation.' },
-                    trap: { name: 'Tactical Sprinter', description: 'Moving fast using disconnected tools, creating technical debt [cite: 312-313]. You have speed without sustainable systems [cite: 313].', truth: 'You have traded long-term resilience for short-term speed[cite: 328].', risk: 'Operational Fragility. Short term wins mask long term structural fragility[cite: 314].', deptHelp: 'We deploy Data/AI Powered Marketing to unify your fragmented tools into a single intelligence layer for attribution and personalization.' },
-                    native: { name: 'Scalable Innovator', description: 'Unified data, automated workflows, and a model for continuous evolution[cite: 318]. You are competing with AI [cite: 319].', truth: 'Your competitive advantage has a half-life[cite: 330].', risk: 'Complacency. Markets shift and innovation must be an operating rhythm, not a project[cite: 321].', deptHelp: 'We partner with leaders on AI x Creative Production to scale content through custom AI applications that empower your teams.' }
+                    giant: { name: 'Underutilized Asset', description: 'Strong data foundations and strategic clarity, but execution is held back by legacy processes and fragmented workflows. You know what to do—you\'re just not built to do it fast.', truth: 'You are structured to protect billable hours, not to automate them.', risk: 'ROI Leakage. Your data advantage erodes every quarter spent in approval cycles instead of optimization loops.' },
+                    paradox: { name: 'Structural Laggard', description: 'Testing AI tools but nothing scales due to fragmented data and an operating model not designed for speed. Every initiative requires a slow business case.', truth: 'You are building a legacy of proof-of-concepts, not an advantage.', risk: 'Market Irrelevance. AI-native competitors are capturing share while you remain in Pilot Purgatory.' },
+                    trap: { name: 'Tactical Sprinter', description: 'Moving fast using disconnected tools, creating technical debt. You have speed without sustainable, connected systems.', truth: 'You have traded long-term resilience for short-term speed.', risk: 'Operational Fragility. Short term wins mask long term structural fragility.' },
+                    native: { name: 'Scalable Innovator', description: 'Unified data, automated workflows, and a model for continuous evolution. You are not just using AI—you are competing with it.', truth: 'Your competitive advantage has a half-life.', risk: 'Complacency. Innovation must be an operating rhythm, not a project.' }
                 },
                 currentQuestion() { return this.questions[this.qIndex]; },
-                progressPercentage() { return Math.round((this.qIndex / this.questions.length) * 100); },
-                getPillarInsight(p) {
+                get progress() { return Math.round((this.qIndex / this.questions.length) * 100); },
+                currentPillarInsight() {
                     const i = {
-                        'Content Supply Chain & Production': 'Market Insight: Brands are shifting toward orchestrated content engines to automate manual production [cite: 191-193].',
-                        'Customer Experience & Personalisation': 'Personalisation Paradox: Most CMOs have data siloed by channel, leading to fragmented journeys [cite: 204-206].',
-                        'Media Performance & Optimization': 'The Shift: Erosion of tracking means moving toward always-on lift and AI-driven MMM [cite: 227-229].',
-                        'Operational Efficiency & Automation': 'Operational Drag: Marketing teams often spend over 50% of time on manual tasks. We see an "Agentic Shift" to free talent [cite: 245-246].',
-                        'Data Foundation & AI Readiness': 'Pilot Purgatory: Many brands test tools that fail to scale because data is fragmented [cite: 269-271].',
-                        'Organizational Structure & Change Readiness': 'Operating Model: Move toward models where AI/Data is embedded directly into marketing to drive agility [cite: 282-284].'
+                        'Content Supply Chain & Production': 'Many brands are trapped in expensive, manual agency briefing cycles or rigid templates that stifle creativity. The market is shifting toward orchestrated content engines using AI agents to automate production while increasing speed and quality.',
+                        'Customer Experience & Personalisation': 'Most CMOs are facing a personalisation paradox: they have the data, but it is siloed by channel. Leaders are moving toward predictive orchestration where AI connects real-time behavior to deliver a unified brand experience.',
+                        'Media Performance & Optimization': 'With the erosion of traditional tracking, many organizations are flying blind. The shift is toward always-on lift and AI-driven MMM that optimizes spend as a dynamic, real-time investment portfolio.',
+                        'Operational Efficiency & Automation': 'Marketing teams are often overwhelmed by operational drag, spending over 50% of time on manual tasks. We are observing an "Agentic Shift," where AI agents handle routine workflows to free talent for strategy.',
+                        'Data Foundation & AI Readiness': 'Too many brands are stuck in pilot purgatory because underlying data is fragmented. The focus is now on creating unified, activated data layers that power autonomous decisioning.',
+                        'Organizational Structure & Change Readiness': 'The traditional multi-specialist agency model has become a bottleneck. We see a move toward Unified Operating Models where AI/Data capabilities are embedded directly into marketing.'
                     };
-                    return i[p] || "";
+                    return i[this.currentQuestion().pillar] || "";
                 },
-                handleAnswer(p, t) {
-                    if(t === 'v') this.vScore += p; else this.fScore += p;
-                    if(this.qIndex < 14) { 
-                        this.qIndex++; 
-                        window.scrollTo({top: 0, behavior: 'smooth'}); 
-                    } else { 
-                        this.results(); 
-                    }
+                handleAnswer(pts, type) {
+                    if(type === 'v') this.vScore += pts; else this.fScore += pts;
+                    if(this.qIndex < this.questions.length - 1) { this.qIndex++; window.scrollTo({top: 0, behavior: 'smooth'}); }
+                    else { this.results(); }
                 },
                 results() {
-                    const isHighF = this.fScore >= 12; // Threshold from source [cite: 294]
-                    const isHighV = this.vScore >= 15; // Threshold from source [cite: 296]
-                    if(isHighF && isHighV) this.diagnosis = 'native';
-                    else if(isHighF && !isHighV) this.diagnosis = 'giant';
-                    else if(!isHighF && isHighV) this.diagnosis = 'trap';
+                    const fHigh = this.fScore >= 12; // Axis cross point
+                    const vHigh = this.vScore >= 15; // Axis cross point
+                    
+                    // Map scores to 0-100% for plotting
+                    this.plotX = (this.vScore / 30) * 100;
+                    this.plotY = 100 - ((this.fScore / 15) * 100);
+
+                    if(fHigh && vHigh) this.diagnosis = 'native';
+                    else if(fHigh && !vHigh) this.diagnosis = 'giant';
+                    else if(!fHigh && vHigh) this.diagnosis = 'trap';
                     else this.diagnosis = 'paradox';
-                    this.viewQuad = this.diagnosis; 
-                    this.step = 'results';
+                    
+                    this.viewQuad = this.diagnosis; this.step = 'results';
                     window.scrollTo({top: 0, behavior: 'smooth'});
+                },
+                reset() {
+                    this.step = 'intro'; this.qIndex = 0; this.vScore = 0; this.fScore = 0; this.diagnosis = '';
                 },
                 downloadPDF() {
                     const e = document.getElementById('results-container');
-                    const o = { margin: 0.5, filename: 'DEPT_Diagnostic_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+                    const o = { margin: 0.5, filename: 'DEPT_Maturity_Diagnosis.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter' } };
                     html2pdf().set(o).from(e).save();
                 }
             }
