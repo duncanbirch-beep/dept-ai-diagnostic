@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEPT® | Technology Growth Readiness Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F4F3; color: #1E1E1E; overflow-x: hidden; }
+        [x-cloak] { display: none !important; }
+        .dept-orange { color: #FF4901; }
+        .bg-dept-orange { background-color: #FF4901; }
+        .font-tight { font-weight: 900; letter-spacing: -0.05em; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: #1E1E1E; padding: 2px; position: relative; }
+        .matrix-cell { background: white; min-height: 180px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; transition: background 0.3s; }
+        .active-quad { background: #FFF7F5 !important; }
+        .plot-point { width: 18px; height: 18px; background: #FF4901; border: 3px solid white; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); z-index: 100; box-shadow: 0 0 15px rgba(255,73,1,0.6); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .company-label { position: absolute; transform: translate(14px, -24px); white-space: nowrap; font-size: 10px; font-weight: 900; text-transform: uppercase; background: black; color: white; padding: 4px 10px; border-radius: 4px; }
+        .horizontal-scale button { width: 54px; height: 54px; border-radius: 50%; font-weight: 900; transition: all 0.2s; border: 2px solid #E2DDDA; background: white; }
+        .horizontal-scale button.selected { background: #FF4901; color: white; border-color: #FF4901; transform: scale(1.1); box-shadow: 0 4px 12px rgba(255,73,1,0.3); }
+        .stage-pill { background: #1E1E1E; color: white; padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body x-data="assessment()" x-init="initStorage()" class="antialiased">
+
+    <nav class="fixed top-0 w-full bg-white border-b border-slate-200 z-50 py-5 px-8 flex justify-between items-center no-print">
+        <div class="flex items-center space-x-3">
+            <svg width="28" height="28" viewBox="0 0 100 100"><path d="M50 0L58.5 31.5L90 25L70 50L90 75L58.5 68.5L50 100L41.5 68.5L10 75L30 50L10 25L41.5 31.5L50 0Z" fill="#FF4901"/></svg>
+            <span class="font-tight text-xl uppercase tracking-tighter">DEPT<span class="text-slate-400">®</span></span>
+        </div>
+        <div x-show="step !== 'intro' && step !== 'results'" class="flex items-center space-x-6" x-cloak>
+            <div class="stage-pill" x-text="currentStageLabel"></div>
+            <div class="w-32 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-dept-orange h-full transition-all duration-700" :style="'width:' + progress + '%'"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20 px-8">
+        <section x-show="step === 'intro'" class="max-w-4xl mx-auto text-center py-10">
+            <h1 class="text-7xl md:text-9xl font-tight uppercase mb-8 leading-[0.9] tracking-tighter">Growth Readiness Assessment</h1>
+            <p class="text-xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">Identify whether technology investments are creating momentum or friction, and what interventions will unlock your next stage of growth.</p>
+            <div class="max-w-md mx-auto mb-10">
+                <input type="text" x-model="companyName" placeholder="ENTER COMPANY NAME" class="w-full p-6 rounded-2xl border-2 border-[#E2DDDA] focus:border-dept-orange text-center text-2xl font-bold outline-none shadow-sm transition-all">
+            </div>
+            <button @click="start()" :disabled="!companyName" class="bg-[#1E1E1E] text-white px-16 py-6 rounded-full font-bold text-xl hover:bg-dept-orange transition-all shadow-xl uppercase tracking-widest disabled:opacity-20">Start Diagnostic</button>
+        </section>
+
+        <section x-show="step === 'transition'" x-cloak class="max-w-5xl mx-auto py-10 text-center animate-in fade-in zoom-in duration-500">
+            <div class="mb-8"><span class="stage-pill px-6 py-3 text-xs" x-text="currentStageLabel"></span></div>
+            <h2 class="text-7xl md:text-8xl font-tight uppercase mb-10 leading-none text-black" x-text="currentPillar.name"></h2>
+            <div class="bg-white p-14 rounded-[56px] shadow-2xl border-t-[12px] border-dept-orange text-left">
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-dept-orange">Strategic Context</h4>
+                <p class="text-2xl text-[#1E1E1E] leading-relaxed font-medium mb-8" x-text="currentPillar.context"></p>
+                <div class="grid md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+                    <div>
+                        <h5 class="text-xs font-black uppercase mb-3">Focus Areas</h5>
+                        <p class="text-slate-500 text-sm leading-relaxed" x-text="currentPillar.assess"></p>
+                    </div>
+                    <div>
+                        <h5 class="text-xs font-black uppercase mb-3">Maturity Indicators</h5>
+                        <p class="text-slate-500 text-sm leading-relaxed" x-text="currentPillar.warning"></p>
+                    </div>
+                </div>
+            </div>
+            <button @click="step = 'quiz'" class="mt-14 bg-black text-white px-14 py-6 rounded-full font-bold text-xl hover:bg-dept-orange transition-all uppercase tracking-widest">Answer Questions</button>
+        </section>
+
+        <section x-show="step === 'gate'" x-cloak class="max-w-2xl mx-auto text-center py-20">
+            <h2 class="text-6xl font-tight uppercase mb-6 leading-tight">Foundations Saved.</h2>
+            <p class="text-slate-500 mb-10 text-xl font-medium leading-relaxed">You've completed the Foundation Strength assessment. Enter your professional email to unlock the <strong>Growth Velocity</strong> section and your final plotted maturity diagnosis.</p>
+            <input type="email" x-model="email" placeholder="PROFESSIONAL EMAIL ADDRESS" class="w-full p-6 rounded-2xl border-2 border-[#E2DDDA] text-center text-xl font-bold mb-8 focus:border-dept-orange outline-none shadow-sm transition-all">
+            <button @click="unlockGate()" :disabled="!email.includes('@')" class="bg-dept-orange text-white px-14 py-6 rounded-full font-bold text-xl hover:bg-black transition-all shadow-xl uppercase tracking-widest">Unlock Section 2</button>
+        </section>
+
+        <section x-show="step === 'quiz'" x-cloak class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-12 gap-16">
+                <div class="lg:col-span-4">
+                    <div class="sticky top-32">
+                        <div class="bg-[#1E1E1E] p-10 rounded-[48px] shadow-2xl text-white relative overflow-hidden border-b-8 border-dept-orange">
+                            <span class="text-dept-orange text-[10px] font-bold uppercase tracking-widest mb-4 block">Stage: <span x-text="currentStageLabel"></span></span>
+                            <h3 class="text-3xl font-tight uppercase mb-6 leading-tight" x-text="currentPillar.name"></h3>
+                            <p class="text-sm text-slate-300 leading-relaxed italic" x-text="currentPillar.context"></p>
+                            <div class="mt-10 pt-8 border-t border-white/10 text-[10px] font-black uppercase tracking-widest opacity-60" x-text="pillarMicroProgress"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="animate-in fade-in slide-in-from-right-8 duration-700">
+                        <h2 class="text-5xl md:text-7xl font-tight uppercase mb-20 leading-[1.1] text-black" x-text="questions[qIndex].text"></h2>
+                        <div class="flex flex-col items-center">
+                            <div class="flex justify-between w-full px-6 mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                                <span>Strongly Disagree</span>
+                                <span>Strongly Agree</span>
+                            </div>
+                            <div class="horizontal-scale flex justify-between w-full max-w-2xl px-2">
+                                <template x-for="n in 5" :key="n">
+                                    <button @click="responses[qIndex] = n; saveToStorage();" :class="responses[qIndex] === n ? 'selected' : ''" class="text-xl" x-text="n"></button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-24 pt-10 border-t border-slate-200">
+                            <button @click="handlePrev()" :disabled="qIndex === 0" class="px-8 py-4 font-bold uppercase text-xs tracking-widest text-slate-400 hover:text-black transition">Previous</button>
+                            <button @click="handleNext()" :disabled="responses[qIndex] === null" class="px-16 py-6 rounded-full font-bold uppercase tracking-widest bg-black text-white hover:bg-dept-orange transition-all shadow-xl">
+                                <span x-text="qIndex === 15 ? 'Generate Final Report' : (isLastInPillar ? 'Next Pillar' : 'Next Question')"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="step === 'results'" x-cloak id="results-report" class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-12 gap-16 items-start">
+                <div class="lg:col-span-5 sticky top-28">
+                    <h2 class="text-6xl font-tight uppercase mb-10 leading-none">Maturity Analysis</h2>
+                    <div class="matrix-grid aspect-square rounded-[40px] shadow-2xl mb-8 border-[16px] border-white overflow-visible relative">
+                        <div class="plot-point" :style="'left:' + plotX + '%; top:' + plotY + '%;'">
+                            <div class="company-label" x-text="companyName"></div>
+                        </div>
+                        <div class="absolute -left-20 top-0 h-full flex flex-col justify-between py-10 text-[9px] font-black uppercase text-slate-400 rotate-180" style="writing-mode: vertical-rl;">
+                            <span>Unified & Activated</span>
+                            <span>Fragmented Data</span>
+                        </div>
+                        <div class="matrix-cell border-r border-b border-slate-100" :class="viewQuad === 'giant' ? 'active-quad' : ''"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Sleeping Giant</span></div>
+                        <div class="matrix-cell border-b border-slate-100" :class="viewQuad === 'native' ? 'active-quad' : ''"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Growth Engine</span></div>
+                        <div class="matrix-cell border-r border-slate-100" :class="viewQuad === 'paradox' ? 'active-quad' : ''"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Complexity Trapped</span></div>
+                        <div class="matrix-cell" :class="viewQuad === 'trap' ? 'active-quad' : ''"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Fragile Growth</span></div>
+                    </div>
+                    <div class="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400 px-6 mb-12">
+                        <span>Low Velocity</span>
+                        <span>High Velocity</span>
+                    </div>
+                    <button @click="resetSession()" class="no-print w-full bg-slate-100 py-5 rounded-2xl font-black uppercase text-xs tracking-widest text-slate-500 hover:bg-black hover:text-white transition-all">Restart Diagnostic</button>
+                </div>
+
+                <div class="lg:col-span-7 bg-white p-16 rounded-[64px] shadow-sm border border-slate-100 relative">
+                    <div class="flex justify-between items-start mb-10">
+                        <div>
+                            <span class="bg-dept-orange text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-1.5 rounded-full mb-4 inline-block">Diagnostic Result</span>
+                            <h3 class="text-7xl font-tight uppercase leading-none text-[#1E1E1E]" x-text="quadrants[viewQuad].name"></h3>
+                        </div>
+                        <button @click="download()" class="no-print bg-slate-50 hover:bg-slate-100 p-6 rounded-full font-bold text-[9px] flex items-center space-x-3 uppercase tracking-widest">
+                            <span>Download PDF report</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="space-y-12">
+                        <div>
+                            <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-4 text-slate-400">Position Profile</h4>
+                            <p class="text-2xl text-[#1E1E1E] leading-relaxed font-medium" x-text="quadrants[viewQuad].description"></p>
+                        </div>
+
+                        <div class="bg-black text-white p-12 rounded-[48px] shadow-xl border-l-[12px] border-dept-orange">
+                            <h4 class="text-dept-orange text-[10px] font-black uppercase tracking-[0.3em] mb-6">The Inconvenient Truth</h4>
+                            <p class="text-3xl italic font-serif leading-snug tracking-tight" x-text="quadrants[viewQuad].truth"></p>
+                        </div>
+
+                        <div class="bg-[#F5F4F3] p-12 rounded-[48px] border-l-[12px] border-slate-200">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Risk Profile</h4>
+                            <p class="text-xl font-bold text-black" x-text="quadrants[viewQuad].risk"></p>
+                        </div>
+
+                        <div class="bg-dept-orange text-white p-12 rounded-[48px]">
+                            <h4 class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-6 opacity-60">Strategic Priority Actions</h4>
+                            <ul class="space-y-6">
+                                <template x-for="act in quadrants[viewQuad].actions">
+                                    <li class="flex items-start space-x-5 text-xl font-black italic">
+                                        <span class="bg-white text-dept-orange w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm not-italic">→</span>
+                                        <span x-text="act"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 mt-16 pt-16 no-print">
+                        <h4 class="text-4xl font-tight uppercase mb-6 leading-none" x-text="quadrants[viewQuad].ctaTitle"></h4>
+                        <p class="text-slate-500 mb-12 text-lg leading-relaxed font-medium" x-text="quadrants[viewQuad].ctaText"></p>
+                        <a href="mailto:duncan.birch@deptagency.com" class="block w-full bg-black text-white text-center py-8 rounded-full font-bold text-xl hover:bg-dept-orange shadow-2xl transition-all uppercase tracking-[0.2em]">Book Growth Gap Session</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function assessment() {
+            return {
+                step: 'intro', qIndex: 0, totalScore: 0, diagnosis: '', viewQuad: '',
+                plotX: 50, plotY: 50, responses: Array(16).fill(null), companyName: '', email: '',
+                pillars: [
+                    { name: 'Data Foundation & AI Readiness', context: 'Connectivity ensures behavioral data isn\'t trapped in silos but actively powering decisions. The goal is to move to activated data layers that power autonomous decisioning.', assess: 'Data connectivity, single customer view reliability, and AI/ML production readiness.', warning: 'AI projects stuck in pilot purgatory; customer data exists in 5+ disconnected systems.' },
+                    { name: 'Internal Enablement & Workflow', context: 'Technology must be rationalized and utilized. Simple changes shouldn\'t take months. An Agentic Shift frees talent for strategy by automating workflows.', assess: 'Stack efficiency, deployment speed, and licensed feature utilization.', warning: '70%+ IT budget consumed by maintenance; simple changes take months.' },
+                    { name: 'Organizational Structure', context: 'Agency models must be built for automation. Friction between marketing and IT often delays implementation by months.', assess: 'Ownership of AI implementation and partner automation alignment.', warning: 'Multi-agency fragmentation and legacy models optimized for billable hours.' },
+                    { name: 'Digital Acquisition', context: 'Growth Velocity measures how effectively tech translates into business outcomes like qualified demand and efficient, scalable performance marketing.', assess: 'Digital channel performance and scalable demand generation.', warning: 'Digital channels underperforming benchmarks; manual allocation based on gut-feels.' },
+                    { name: 'Conversion Rate', context: 'How effectively do digital experiences convert interest into action? We assess the friction in the customer journey and purchase paths.', assess: 'Journey friction and purchase path optimization.', warning: 'Customer journey is fragmented across touchpoints; high conversion friction.' },
+                    { name: 'Personalisation', context: 'Delivering contextually relevant experiences at scale. Customer data must be activated to create real-time value, not just stored.', assess: 'Predictive orchestration and behavior-based activation.', warning: 'Personalisation is manual, rule-based, or non-existent.' },
+                    { name: 'Customer Retention', context: 'Using digital to increase lifetime value (LTV). Technology should be used to predict churn and prevent loyalty leakage.', assess: 'CRM/Retention impact and systematic revenue attribution.', warning: 'Growth happening despite digital, not because of it; loyalty leakage.' },
+                    { name: 'Optimization & Attribution', context: 'Moving beyond ROAS to prove true incrementality. Creative and media should operate in continuous, AI-driven feedback loops.', assess: 'Attribution accuracy and AI content engine transcreation.', warning: 'Relying on siloed metrics; creative and media teams operating separately.' }
+                ],
+                questions: [
+                    { id: 1, p: 0, type: 'f', text: 'I trust our customer data enough to let an AI model make automated, real-time decisions for our customers.' },
+                    { id: 2, p: 0, type: 'f', text: 'When we test a new AI idea, we can move from a successful pilot to a full scale rollout without being held back by data quality.' },
+                    { id: 3, p: 1, type: 'f', text: 'Our technology stack is well-integrated, meaning my team rarely has to manually move data between systems in spreadsheets.' },
+                    { id: 4, p: 1, type: 'f', text: 'More than 50% of our IT/Data budget is spent on building new capabilities rather than just "keeping the lights on."' },
+                    { id: 5, p: 2, type: 'f', text: 'We have a dedicated internal team or embedded partner that builds and evolves AI capabilities directly within marketing.' },
+                    { id: 6, p: 2, type: 'f', text: 'Our current agency or partner model is built for speed and automation rather than just protecting billable hours.' },
+                    { id: 7, p: 3, type: 'v', text: 'We use automated models to find high-value prospects and optimize media spend based on predicted profit rather than just revenue.' },
+                    { id: 8, p: 3, type: 'v', text: 'Our digital channels are a primary driver of new customer acquisition, outperforming industry benchmarks.' },
+                    { id: 9, p: 4, type: 'v', text: 'Our digital experiences use AI (like smart search or virtual assistants) to help customers find what they need instantly.' },
+                    { id: 10, p: 4, type: 'v', text: 'We can deploy new digital capabilities or content updates in weeks rather than waiting months for dev cycles.' },
+                    { id: 11, p: 5, type: 'v', text: 'We deliver 1:1 experiences at scale by using AI to predict and serve the "Next Best Action" for every customer.' },
+                    { id: 12, p: 5, type: 'v', text: 'We have an active experimentation program with multiple AI-driven tests running continuously to improve relevance.' },
+                    { id: 13, p: 6, type: 'v', text: 'We use predictive data to identify customers likely to leave and automatically send personalized offers to keep them.' },
+                    { id: 14, p: 6, type: 'v', text: 'Our CRM and retention programs are a measurable driver of increased customer lifetime value.' },
+                    { id: 15, p: 7, type: 'v', text: 'We use AI to automatically generate and transcreate brand-consistent content variants to increase our speed to market.' },
+                    { id: 16, p: 7, type: 'v', text: 'We can clearly prove the incremental revenue generated by our technology investments across all channels.' }
+                ],
+                quadrants: {
+                    giant: { 
+                        name: 'Sleeping Giant', 
+                        description: 'Strong data foundations and strategic clarity, but execution speed is held back by legacy processes or fragmented agencies. You know what to do, you\'re just not built to do it fast.', 
+                        truth: 'Your current operating model is structured to protect billable hours, not to automate them. Misalignment is your primary bottleneck.', 
+                        risk: 'While you\'re planning, competitors are shipping. Your data advantage erodes every quarter spent in approval cycles instead of optimization loops.',
+                        actions: ['Activate data for personalization', 'Establish test-and-learn culture', 'Deploy AI-driven customer experiences'],
+                        ctaTitle: 'Next Step: Activation Workshop',
+                        ctaText: 'You have the data. We have the speed. Let\'s map out how to turn your foundation into a high-velocity execution engine.'
+                    },
+                    paradox: { 
+                        name: 'Complexity Trapped', 
+                        description: 'Technology has become a burden rather than an enabler. Disconnected systems and unreliable data mean you pay a "complexity tax" on every initiative.', 
+                        truth: 'Pilots fail because the organisation isn\'t ready, not because tech isn\'t. You are building proof of concepts, not an advantage.', 
+                        risk: 'You risk becoming functionally obsolete as AI-native competitors lower acquisition costs and capture first choice positions.',
+                        actions: ['Rationalise the stack', 'Establish customer data foundation (CDP)', 'Modernize incrementally via API-first approach'],
+                        ctaTitle: 'Next Step: Foundation Audit',
+                        ctaText: 'Stop paying the complexity tax. Let\'s identify the 3-5 specific friction points that are stalling your AI transformation.'
+                    },
+                    trap: { 
+                        name: 'Fragile Growth', 
+                        description: 'Business is growing, but success masks underlying fragility. Growth is happening despite the tech, not because of it, creating scale risk.', 
+                        truth: 'Your velocity is impressive until something breaks. Sustainable speed requires architectural thinking, not just tactical duct tape.', 
+                        risk: 'Short term wins are masking long term fragility. API changes or key hire departures could break the entire operation.',
+                        actions: ['Address critical technical debt', 'Automate manual processes', 'Invest in scalable architecture'],
+                        ctaTitle: 'Next Step: Stability Roadmap',
+                        ctaText: 'Success shouldn\'t depend on heroic effort. Let\'s build the sustainable systems you need to scale your current growth.'
+                    },
+                    native: { 
+                        name: 'Growth Engine', 
+                        description: 'Technology is actively driving growth. Innovation is an operating rhythm, not a project. Returns are compounding as systems improve.', 
+                        truth: 'Your competitive advantage has a half-life. New models disrupt monthly. Staying ahead requires pushing limits, not just roadmaps.', 
+                        risk: 'The only risk is complacency. Markets shift, models evolve, and competitors are studying your playbook.',
+                        actions: ['Scale successful initiatives', 'Explore adjacent market opportunities', 'Future-proof via Agentic AI'],
+                        ctaTitle: 'Next Step: Innovation Sprint',
+                        ctaText: 'You are ahead. Let\'s keep it that way by exploring the next wave of agentic commerce and LLM-native experiences.'
+                    }
+                },
+                get currentPillar() { return this.pillars[this.questions[this.qIndex].p]; },
+                get currentStageLabel() { return this.qIndex < 6 ? 'Foundation Strength' : 'Growth Velocity'; },
+                get progress() { return Math.round((this.qIndex / 16) * 100); },
+                get isLastInPillar() { const n = this.questions[this.qIndex+1]; return !n || n.p !== this.questions[this.qIndex].p; },
+                get pillarMicroProgress() { const qs = this.questions.filter(q => q.p === this.questions[this.qIndex].p); return `Q ${qs.indexOf(this.questions[this.qIndex])+1} of ${qs.length} in Pillar`; },
+                start() { this.step = 'transition'; this.saveToStorage(); },
+                handleNext() {
+                    if (this.qIndex === 5 && !this.email) { this.step = 'gate'; return; }
+                    if (this.isLastInPillar && this.qIndex < 15) { this.qIndex++; this.step = 'transition'; }
+                    else if (this.qIndex < 15) { this.qIndex++; }
+                    else { this.finish(); }
+                    this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'});
+                },
+                handlePrev() { if(this.qIndex > 0) this.qIndex--; this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'}); },
+                unlockGate() { this.step = 'transition'; this.qIndex = 6; this.saveToStorage(); },
+                finish() {
+                    let vF = 0, fF = 0;
+                    this.responses.forEach((v, i) => { if(v) { if(this.questions[i].type === 'v') vF += v; else fF += v; } });
+                    this.plotX = ((vF - 10) / 40) * 100; this.plotY = 100 - (((fF - 6) / 24) * 100);
+                    this.diagnosis = (fF >= 19) ? (vF >= 30 ? 'native' : 'giant') : (vF >= 30 ? 'trap' : 'paradox');
+                    this.viewQuad = this.diagnosis; this.step = 'results';
+                    this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'});
+                },
+                initStorage() { const s = localStorage.getItem('deptDiagnosticV3'); if(s) Object.assign(this, JSON.parse(s)); },
+                saveToStorage() { localStorage.setItem('deptDiagnosticV3', JSON.stringify({step:this.step, qIndex:this.qIndex, responses:this.responses, companyName:this.companyName, email:this.email})); },
+                resetSession() { localStorage.removeItem('deptDiagnosticV3'); location.reload(); },
+                download() { html2pdf().set({margin:0.5, filename:'DEPT_Diagnostic.pdf'}).from(document.getElementById('results-report')).save(); }
+            }
+        }
+    </script>
+</body>
+</html>
