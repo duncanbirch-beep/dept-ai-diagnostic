@@ -143,12 +143,12 @@
                     <div class="space-y-16">
                         <div class="bg-[#1E1E1E] text-white p-16 rounded-[56px] shadow-2xl border-l-[16px] border-dept-orange">
                             <h4 class="text-dept-orange text-4xl font-black uppercase tracking-[0.15em] mb-8">Profile</h4>
-                            <p class="text-3xl text-slate-100 leading-snug font-medium mb-14" x-text="quadrants[viewQuad].profile"></p>
+                            <p class="text-2xl text-slate-100 leading-snug font-medium mb-14" x-text="quadrants[viewQuad].profile"></p>
                             
                             <h4 class="text-dept-orange text-4xl font-black uppercase tracking-[0.15em] mb-8">Typical Characteristics</h4>
                             <ul class="space-y-6">
                                 <template x-for="char in quadrants[viewQuad].characteristics">
-                                    <li class="flex items-start space-x-6 text-2xl font-bold leading-tight">
+                                    <li class="flex items-start space-x-6 text-lg font-bold leading-tight">
                                         <span class="text-dept-orange mt-1">●</span>
                                         <span x-text="char"></span>
                                     </li>
