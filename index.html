@@ -42,7 +42,7 @@
     <main class="pt-32 pb-20 px-8">
         <section x-show="step === 'intro'" class="max-w-4xl mx-auto text-center py-10">
             <h1 class="text-7xl md:text-9xl font-tight uppercase mb-8 leading-[0.9] tracking-tighter">Growth Readiness Assessment</h1>
-            <p class="text-xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">The barrier to growth in 2026 isn't a lack of AI features; it's the integration gap that prevents us from using them. Identify where your organization sits on the technology-enabled growth journey.</p>
+            <p class="text-xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">Identify whether technology investments are creating momentum or friction, and what interventions will unlock your next stage of growth.</p>
             <div class="max-w-md mx-auto mb-10">
                 <input type="text" x-model="companyName" placeholder="ENTER COMPANY NAME" class="w-full p-6 rounded-2xl border-2 border-[#E2DDDA] focus:border-dept-orange text-center text-2xl font-bold outline-none transition-all shadow-sm">
             </div>
@@ -71,7 +71,7 @@
 
         <section x-show="step === 'gate'" x-cloak class="max-w-2xl mx-auto text-center py-20">
             <h2 class="text-6xl font-tight uppercase mb-6 leading-tight">Foundations Saved.</h2>
-            <p class="text-slate-500 mb-10 text-xl font-medium leading-relaxed">You've completed the Foundation Strength assessment. Enter your professional email to unlock the <strong>Growth Velocity</strong> section and your final plotted maturity diagnosis.</p>
+            <p class="text-slate-500 mb-10 text-xl font-medium leading-relaxed">Enter your professional email to unlock the <strong>Growth Velocity</strong> section and your final plotted maturity diagnosis.</p>
             <input type="email" x-model="email" placeholder="PROFESSIONAL EMAIL ADDRESS" class="w-full p-6 rounded-2xl border-2 border-[#E2DDDA] text-center text-xl font-bold mb-8 focus:border-dept-orange outline-none shadow-sm transition-all">
             <button @click="unlockGate()" :disabled="!email.includes('@')" class="bg-dept-orange text-white px-14 py-6 rounded-full font-bold text-xl hover:bg-black transition-all shadow-xl uppercase tracking-widest">Unlock Stage 2</button>
         </section>
@@ -91,7 +91,6 @@
                 <div class="lg:col-span-8">
                     <div class="animate-in fade-in slide-in-from-right-8 duration-700">
                         <h2 class="text-5xl md:text-7xl font-tight uppercase mb-20 leading-[1.1] text-black" x-text="questions[qIndex].text"></h2>
-                        
                         <div class="flex flex-col items-center">
                             <div class="flex justify-between w-full px-6 mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                                 <span>Strongly Disagree</span>
@@ -99,18 +98,14 @@
                             </div>
                             <div class="horizontal-scale flex justify-between w-full max-w-2xl px-2">
                                 <template x-for="n in 5" :key="n">
-                                    <button @click="responses[qIndex] = n; saveToStorage();" 
-                                            :class="responses[qIndex] === n ? 'selected' : ''"
-                                            class="text-xl" x-text="n"></button>
+                                    <button @click="responses[qIndex] = n; saveToStorage();" :class="responses[qIndex] === n ? 'selected' : ''" class="text-xl" x-text="n"></button>
                                 </template>
                             </div>
                         </div>
-
                         <div class="flex justify-between mt-24 pt-10 border-t border-slate-200">
-                            <button @click="handlePrev()" :disabled="qIndex === 0" class="px-8 py-4 font-bold uppercase text-xs tracking-widest text-slate-400 hover:text-black disabled:opacity-0 transition">Previous</button>
-                            <button @click="handleNext()" :disabled="responses[qIndex] === null" 
-                                    class="px-16 py-6 rounded-full font-bold uppercase tracking-widest bg-black text-white hover:bg-dept-orange transition-all shadow-xl">
-                                <span x-text="qIndex === 11 ? 'Finalise My Report' : (isLastInPillar ? 'Next Pillar' : 'Next Question')"></span>
+                            <button @click="handlePrev()" :disabled="qIndex === 0" class="px-8 py-4 font-bold uppercase text-xs tracking-widest text-slate-400 hover:text-black transition">Previous</button>
+                            <button @click="handleNext()" :disabled="responses[qIndex] === null" class="px-16 py-6 rounded-full font-bold uppercase tracking-widest bg-black text-white hover:bg-dept-orange transition-all shadow-xl">
+                                <span x-text="qIndex === 15 ? 'Finalise My Report' : (isLastInPillar ? 'Next Pillar' : 'Next Question')"></span>
                             </button>
                         </div>
                     </div>
@@ -159,24 +154,14 @@
                             <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-4 text-slate-400">Position Profile</h4>
                             <p class="text-2xl text-[#1E1E1E] leading-relaxed font-medium" x-text="quadrants[viewQuad].description"></p>
                         </div>
-
                         <div class="bg-black text-white p-12 rounded-[48px] shadow-xl border-l-[12px] border-dept-orange">
                             <h4 class="text-dept-orange text-[10px] font-black uppercase tracking-[0.3em] mb-6">The Inconvenient Truth</h4>
                             <p class="text-3xl italic font-serif leading-snug tracking-tight" x-text="quadrants[viewQuad].truth"></p>
                         </div>
-
                         <div class="bg-[#F5F4F3] p-12 rounded-[48px]">
-                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Strategic Characteristics</h4>
-                            <ul class="space-y-4">
-                                <template x-for="char in quadrants[viewQuad].characteristics">
-                                    <li class="flex items-start space-x-4 text-lg font-bold">
-                                        <span class="text-dept-orange mt-1">●</span>
-                                        <span x-text="char"></span>
-                                    </li>
-                                </template>
-                            </ul>
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Risk Profile</h4>
+                            <p class="text-xl font-bold text-red-800" x-text="quadrants[viewQuad].risk"></p>
                         </div>
-
                         <div class="bg-dept-orange text-white p-12 rounded-[48px]">
                             <h4 class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-6 opacity-60">Priority Actions</h4>
                             <ul class="space-y-6">
@@ -191,9 +176,9 @@
                     </div>
 
                     <div class="border-t border-slate-100 mt-16 pt-16 no-print">
-                        <h4 class="text-4xl font-tight uppercase mb-6 leading-none">Your Next Step: The Growth Gap Session</h4>
-                        <p class="text-slate-500 mb-12 text-lg leading-relaxed font-medium">CMOs score between 18-32 on average. Let's map your 3-5 specific friction points and identify the fastest path to compounding ROI.</p>
-                        <a href="mailto:duncan.birch@deptagency.com" class="block w-full bg-black text-white text-center py-8 rounded-full font-bold text-xl hover:bg-dept-orange shadow-2xl uppercase tracking-[0.2em]">Book Session with Duncan Birch</a>
+                        <h4 class="text-4xl font-tight uppercase mb-6 leading-none">The Growth Gap Session</h4>
+                        <p class="text-slate-500 mb-12 text-lg leading-relaxed font-medium">CMOs score between 18-32 on average. Most are stuck between strategic intent and operational reality. That gap is where your growth is hiding.</p>
+                        <a href="mailto:duncan.birch@deptagency.com" class="block w-full bg-black text-white text-center py-8 rounded-full font-bold text-xl hover:bg-dept-orange shadow-2xl transition-all uppercase tracking-[0.2em]">Book Session with Duncan Birch</a>
                     </div>
                 </div>
             </div>
@@ -204,85 +189,67 @@
         function assessment() {
             return {
                 step: 'intro', qIndex: 0, totalScore: 0, diagnosis: '', viewQuad: '',
-                plotX: 50, plotY: 50, responses: Array(12).fill(null), companyName: '', email: '',
+                plotX: 50, plotY: 50, responses: Array(16).fill(null), companyName: '', email: '',
                 pillars: [
-                    { name: 'Data Foundation & AI Readiness', context: 'Foundation Strength measures how well tech infrastructure supports growth. Connectivity ensures data isn\'t trapped in silos but actively powering decisions.', assess: 'Data connectivity, AI/ML readiness, and technical debt consumption.', warning: '70%+ of budget spent on maintenance; AI projects stuck in pilot purgatory.' },
-                    { name: 'Internal Enablement & Workflow', context: 'Technology must be rationalised and utilised. Simple changes shouldn\'t take months due to system interdependencies.', assess: 'Stack efficiency, licensed feature utilisation, and speed to market.', warning: 'Shelfware problems; multiple point solutions performing overlapping functions.' },
-                    { name: 'Digital Acquisition', context: 'Growth Velocity measures how effectively tech translates into business outcomes like qualified demand and efficient, scalable performance marketing.', assess: 'Digital channel performance and scalable demand generation.', warning: 'Digital channels underperforming relative to market benchmarks.' },
-                    { name: 'Conversion Rate', context: 'How effectively do digital experiences convert interest into action? We assess the friction in the customer journey and purchase paths.', assess: 'Journey friction and commerce platform revenue optimisation.', warning: 'Conversion rates below benchmark; fragmented purchase paths.' },
-                    { name: 'Personalisation', context: 'Delivering contextually relevant experiences at scale. Customer data must be activated to create value, not just stored.', assess: 'Predictive orchestration and behavior-based activation.', warning: 'Personalisation is manual, rule-based, or non-existent.' },
-                    { name: 'Customer Retention', context: 'Using digital to increase lifetime value (LTV). Technology should predict churn and prevent loyalty leakage.', assess: 'CRM/Retention impact and systematic revenue attribution.', warning: 'Growth happening despite digital, not because of it; loyalty leakage.' }
+                    { name: 'Data Foundation & AI Readiness', context: 'Foundation Strength measures how well tech infrastructure supports growth. Connectivity ensures data actively powers real-time decisions.', assess: 'Data connectivity, single customer view reliability, and AI/ML production readiness.', warning: 'AI projects stuck in pilot purgatory; data exists in 5+ disconnected systems.' },
+                    { name: 'Internal Enablement & Workflow', context: 'Technology must be rationalised. Simple changes shouldn\'t take months. An Agentic Shift frees talent for strategy by automating workflows.', assess: 'Stack efficiency, deployment speed, and licensed capability adoption.', warning: '70%+ IT budget consumed by maintenance; simple changes take months.' },
+                    { name: 'Organizational Structure', context: 'Agency models must be built for automation. Friction between marketing and IT delays implementation by months.', assess: 'Ownership of AI implementation and partner automation alignment.', warning: 'Multi-agency fragmentation and legacy models optimized for billable hours.' },
+                    { name: 'Digital Acquisition', context: 'Growth Velocity measures how effectively tech translates to demand generation and performance marketing efficiency.', assess: 'Digital channel performance and scalable demand generation.', warning: 'Channels underperforming market benchmarks; manual allocation gut-feels.' },
+                    { name: 'Conversion Rate', context: 'Effectively converting interest into action. We assess friction in the customer journey and buy paths.', assess: 'Journey friction and purchase path optimization.', warning: 'Customer journey fragmented across touchpoints; high conversion friction.' },
+                    { name: 'Personalisation', context: 'Delivering contextually relevant experiences at scale. Data must be activated to create real-time value.', assess: 'Predictive orchestration and behavior-based activation.', warning: 'Personalisation manual, rule-based, or non-existent.' },
+                    { name: 'Customer Retention', context: 'Using digital to increase LTV. Technology should predict churn and prevent loyalty leakage.', assess: 'CRM/Retention impact and churn prevention automation.', warning: 'Growth happening despite digital, not because of it.' },
+                    { name: 'Optimization & Attribution', context: 'Moving beyond ROAS to prove true incrementality. Creative and media should operate in continuous feedback loops.', assess: 'Attribution accuracy and AI content engine transcreation.', warning: 'Relying on siloed metrics; creative and media teams operating separately.' }
                 ],
                 questions: [
-                    { id: 1, p:0, type:'f', text: 'We have a single, reliable view of our customer across all touchpoints and systems.' },
-                    { id: 2, p:0, type:'f', text: 'Our data quality is high enough to confidently train and deploy AI/ML models in production.' },
-                    { id: 3, p:1, type:'f', text: 'More than 50% of our IT budget is spent on innovation and new capabilities rather than maintenance.' },
-                    { id: 4, p:1, type:'f', text: 'Our technology stack is integrated, requiring minimal manual data transfer between systems.' },
-                    { id: 5, p:2, type:'v', text: 'Digital channels are a primary driver of new customer acquisition for our business.' },
-                    { id: 6, p:3, type:'v', text: 'Our digital conversion rates meet or exceed industry benchmarks.' },
-                    { id: 7, p:4, type:'v', text: 'We deliver personalised experiences based on real-time customer data and behavior.' },
-                    { id: 8, p:5, type:'v', text: 'Our CRM/retention programmes measurably increase customer lifetime value.' },
-                    { id: 9, p:4, type:'v', text: 'We have an active experimentation programme with multiple tests running continuously.' },
-                    { id: 10, p:5, type:'v', text: 'We can clearly attribute revenue impact and incrementality to our technology investments.' },
-                    { id: 11, p:1, type:'f', text: 'We can deploy new digital capabilities to market within weeks, not months.' },
-                    { id: 12, p:1, type:'f', text: 'We actively use 70%+ of the features in our core marketing and commerce platforms.' }
+                    { id: 1, p: 0, type: 'f', text: 'I trust our customer data enough to let an AI model make automated, real-time decisions for our customers.' },
+                    { id: 2, p: 0, type: 'f', text: 'When we test a new AI idea, we can move from a successful pilot to a full rollout without being held back by data quality.' },
+                    { id: 3, p: 1, type: 'f', text: 'Our technology stack is well-integrated, meaning my team rarely has to manually move data between systems in spreadsheets.' },
+                    { id: 4, p: 1, type: 'f', text: 'More than 50% of our IT/Data budget is spent on building new capabilities rather than just "keeping the lights on."' },
+                    { id: 5, p: 2, type: 'f', text: 'We have a dedicated internal team or embedded partner that builds and evolves AI capabilities directly within marketing.' },
+                    { id: 6, p: 2, type: 'f', text: 'Our current agency or partner model is built for speed and automation rather than just protecting billable hours.' },
+                    { id: 7, p: 3, type: 'v', text: 'We use automated models to find high-value prospects and optimize media spend based on predicted profit rather than just revenue.' },
+                    { id: 8, p: 3, type: 'v', text: 'Our digital channels are a primary driver of new customer acquisition, outperforming industry benchmarks.' },
+                    { id: 9, p: 4, type: 'v', text: 'Our digital experiences use AI (like smart search or virtual assistants) to help customers find what they need instantly.' },
+                    { id: 10, p: 4, type: 'v', text: 'We can deploy new digital capabilities or content updates in weeks rather than waiting months for backend dev cycles.' },
+                    { id: 11, p: 5, type: 'v', text: 'We deliver 1:1 experiences at scale by using AI to predict and serve the "Next Best Action" for every customer.' },
+                    { id: 12, p: 5, type: 'v', text: 'We have an active experimentation program with multiple AI-driven tests running continuously to improve relevance.' },
+                    { id: 13, p: 6, type: 'v', text: 'We use predictive data to identify customers likely to leave and automatically send personalized offers to keep them.' },
+                    { id: 14, p: 6, type: 'v', text: 'Our CRM and retention programs are a measurable driver of increased customer lifetime value.' },
+                    { id: 15, p: 7, type: 'v', text: 'We use AI to automatically generate and transcreate brand-consistent content variants to increase our speed to market.' },
+                    { id: 16, p: 7, type: 'v', text: 'We can clearly prove the incremental revenue generated by our technology investments across all channels.' }
                 ],
                 quadrants: {
-                    giant: { 
-                        name: 'The Sleeping Giant', 
-                        description: 'You have strong foundations but execution is held back by legacy processes. You know what to do—you\'re just not built to do it fast.', 
-                        truth: 'Your current operation is structured to protect billable hours, not to automate them. Misalignment is your primary bottleneck.', 
-                        characteristics: ['Modern integrated stack with strong capabilities', 'Low utilisation of licensed features', 'Data available but not activated for personalization', 'Conservative approach to experimentation'],
-                        actions: ['Activate data for personalization', 'Establish test-and-learn culture', 'Deploy AI-driven customer experiences']
-                    },
-                    paradox: { 
-                        name: 'Complexity Trapped', 
-                        description: 'Technology has become a burden rather than an enabler. Disconnected systems and unreliable data mean you pay a "complexity tax" on every initiative.', 
-                        truth: 'Pilots fail because the organisation isn\'t ready, not because technology isn\'t. You are building proof of concepts, not a competitive advantage.', 
-                        characteristics: ['Multiple legacy systems with poor integration', 'Data scattered across 5+ disconnected platforms', '70%+ of budget consumed by maintenance', 'AI projects fail due to data quality issues'],
-                        actions: ['Rationalise the stack', 'Establish customer data foundation (CDP)', 'Modernize incrementally via API-first approach']
-                    },
-                    trap: { 
-                        name: 'Fragile Growth', 
-                        description: 'The business is growing, but success masks underlying fragility. Growth is happening despite the technology, not because of it.', 
-                        truth: 'Your velocity is impressive until something breaks. Sustainable speed requires architectural thinking, not just tactical duct tape.', 
-                        characteristics: ['Manual workarounds compensating for system gaps', 'Key customer data in shadow systems', 'Growth dependent on heroic individual effort', 'Technical debt accumulating faster than it\'s addressed'],
-                        actions: ['Address critical technical debt', 'Automate manual processes', 'Invest in scalable architecture']
-                    },
-                    native: { 
-                        name: 'Growth Engine', 
-                        description: 'Technology is actively driving growth. Innovation is an operating rhythm, not a project. Returns are compounding as systems learn and improve.', 
-                        truth: 'Your competitive advantage has a half-life. Staying ahead requires actively pushing toward what\'s next, not just following a roadmap.', 
-                        characteristics: ['Technology investments delivering measurable ROI', 'Al and automation actively improving operations', 'Continuous experimentation driving gains', 'Innovation-focused technology team'],
-                        actions: ['Double down on successful initiatives', 'Explore adjacent market opportunities', 'Future-proof via Agentic AI and composable tech']
-                    }
+                    giant: { name: 'The Sleeping Giant', description: 'Strong foundations but execution held back by legacy processes. You know what to do—you\'re just not built to do it fast [cite: 434-435].', truth: 'Your operating model is structured to protect billable hours, not to automate them. Misalignment is your primary bottleneck[cite: 458].', risk: 'Competitors are shipping while you are planning. Your data advantage erodes every quarter spent in approval cycles [cite: 436-437].', actions: ['Activate data for personalization', 'Establish test-and-learn culture', 'Deploy AI-driven customer experiences [cite: 586]'] },
+                    paradox: { name: 'Complexity Trapped', description: 'Technology has become a burden rather than an enabler. Disconnected systems pay a "complexity tax" [cite: 550-551].', truth: 'Pilots fail because the organisation isn\'t ready, not because tech isn\'t. You are building POCs, not advantages [cite: 460].', risk: 'Risk of functional obsolescence as AI-native competitors lower acquisition costs [cite: 443].', actions: ['Rationalise the stack', 'Establish customer data foundation (CDP)', 'Modernize incrementally via API-first [cite: 559-561]'] },
+                    trap: { name: 'Fragile Growth', description: 'Business is growing, but success masks underlying fragility. Growth happens despite tech, not because of it [cite: 566-567].', truth: 'Velocity is impressive until something breaks. You are running on tool duct tape, not architectural strategy[cite: 462].', risk: 'Short term wins mask long term fragility. API changes or key hire exits could break the operation [cite: 448-449].', actions: ['Address critical technical debt', 'Automate manual processes', 'Invest in scalable architecture [cite: 574-576]'] },
+                    native: { name: 'Growth Engine', description: 'Technology is actively driving growth. Innovation is an operating rhythm, not a project [cite: 591-593].', truth: 'Your competitive advantage has a half-life. New models disrupt architectures monthly. Staying ahead requires pushing limits[cite: 464].', risk: 'The only risk is complacency. Markets shift, models evolve, and competitors study your playbook [cite: 454].', actions: ['Scale successful initiatives', 'Explore adjacent market models', 'Agentic AI implementation [cite: 599-601]'] }
                 },
                 get currentPillar() { return this.pillars[this.questions[this.qIndex].p]; },
-                get currentStageLabel() { return this.qIndex < 4 || (this.qIndex >= 10) ? 'Foundation Strength' : 'Growth Velocity'; },
-                get progress() { return Math.round((this.qIndex / 12) * 100); },
+                get currentStageLabel() { return this.qIndex < 6 ? 'Foundation Strength' : 'Growth Velocity'; },
+                get progress() { return Math.round((this.qIndex / 16) * 100); },
                 get isLastInPillar() { const n = this.questions[this.qIndex+1]; return !n || n.p !== this.questions[this.qIndex].p; },
                 get pillarMicroProgress() { const qs = this.questions.filter(q => q.p === this.questions[this.qIndex].p); return `Q ${qs.indexOf(this.questions[this.qIndex])+1} of ${qs.length} in Pillar`; },
                 start() { this.step = 'transition'; this.saveToStorage(); },
                 handleNext() {
-                    if (this.qIndex === 3 && !this.email) { this.step = 'gate'; return; }
-                    if (this.isLastInPillar && this.qIndex < 11) { this.qIndex++; this.step = 'transition'; }
-                    else if (this.qIndex < 11) { this.qIndex++; }
+                    if (this.qIndex === 5 && !this.email) { this.step = 'gate'; return; }
+                    if (this.isLastInPillar && this.qIndex < 15) { this.qIndex++; this.step = 'transition'; }
+                    else if (this.qIndex < 15) { this.qIndex++; }
                     else { this.finish(); }
                     this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'});
                 },
                 handlePrev() { if(this.qIndex > 0) this.qIndex--; this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'}); },
-                unlockGate() { this.step = 'transition'; this.qIndex = 4; this.saveToStorage(); },
+                unlockGate() { this.step = 'transition'; this.qIndex = 6; this.saveToStorage(); },
                 finish() {
                     let vF = 0, fF = 0;
                     this.responses.forEach((v, i) => { if(v) { if(this.questions[i].type === 'v') vF += v; else fF += v; } });
-                    this.plotX = ((vF - 6) / 24) * 100; this.plotY = 100 - (((fF - 6) / 24) * 100);
-                    this.diagnosis = (fF >= 19) ? (vF >= 19 ? 'native' : 'giant') : (vF >= 19 ? 'trap' : 'paradox');
+                    this.plotX = ((vF - 10) / 40) * 100; this.plotY = 100 - (((fF - 6) / 24) * 100);
+                    this.diagnosis = (fF >= 19) ? (vF >= 30 ? 'native' : 'giant') : (vF >= 30 ? 'trap' : 'paradox');
                     this.viewQuad = this.diagnosis; this.step = 'results';
                     this.saveToStorage(); window.scrollTo({top:0, behavior:'smooth'});
                 },
-                initStorage() { const s = localStorage.getItem('deptDiagnosticFinal'); if(s) Object.assign(this, JSON.parse(s)); },
-                saveToStorage() { localStorage.setItem('deptDiagnosticFinal', JSON.stringify({step:this.step, qIndex:this.qIndex, responses:this.responses, companyName:this.companyName, email:this.email})); },
-                resetSession() { localStorage.removeItem('deptDiagnosticFinal'); location.reload(); },
+                initStorage() { const s = localStorage.getItem('deptDiagnosticV2'); if(s) Object.assign(this, JSON.parse(s)); },
+                saveToStorage() { localStorage.setItem('deptDiagnosticV2', JSON.stringify({step:this.step, qIndex:this.qIndex, responses:this.responses, companyName:this.companyName, email:this.email})); },
+                resetSession() { localStorage.removeItem('deptDiagnosticV2'); location.reload(); },
                 download() { html2pdf().set({margin:0.5, filename:'DEPT_Diagnostic.pdf'}).from(document.getElementById('results-report')).save(); }
             }
         }
